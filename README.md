@@ -16,6 +16,23 @@ peticiones HTTP; este micro front no tiene lógica de autenticación.
 | Paginación | **Del servidor**, 10 registros por página (`Pagina` / `CantidadRegistros`). |
 | Enviar reporte | Activo con resultados. Confirma, pide el archivo al backend y muestra "Tu reporte está en camino". El correo destino lo resuelve el backend con el token. |
 
+## Pantalla `movilizados-cliente`
+
+**Reporte de descuentos y movilizados por cliente.** Mismos filtros, tabla, paginación y envío
+que la pantalla anterior, con:
+
+| Elemento | Comportamiento |
+| --- | --- |
+| Pestañas | "Dtos. personalizados" y "Dtos. automáticos" (tabs de spartan). La activa vive en la URL (`?tipo=automaticos`); al cambiar se conserva el periodo y la búsqueda y se pide el otro `TipoDescuento`. |
+| Tabla | Columnas de `ResponseInformeDescuentoCliente`, con "Nombre del cliente" y "Acciones" fijas. |
+| Enviar (por fila) | Envía el informe de la pestaña solo para ese cliente (`cedula` de la fila). |
+| Enviar reporte | Envía el informe de la pestaña para el periodo y la búsqueda consultados. |
+
+Las dos pantallas comparten `app-report-filters` (periodo, buscador con input group de spartan,
+"Consultar" y "Enviar reporte"), `injectReportQuery` (consulta en la URL), `createReportResults`
+(estados de la tabla, búsqueda y paginador), `reportColumn` (formato y orden de columnas) y
+`app-send-report-dialog` (textos configurables).
+
 ## API (CajaInter)
 
 La URL base se configura en `src/environments/environment.ts` (`apiBaseUrl`, hasta `/api/CajaInter`)
@@ -25,16 +42,20 @@ o con el token `API_BASE_URL`. Las respuestas usan la envoltura `RespuestaGenera
 | Método | Ruta | Uso |
 | --- | --- | --- |
 | GET | `/Informes/ObtenerInformeDetalladoVentasDescuento?FechaInicio&FechaFin&Cedula&Pagina&CantidadRegistros` | Datos de la tabla. Fechas sin hora (`AAAA-MM-DD`). |
-| POST | `/Informes/ObtenerInformeDescuento` | "Enviar reporte". Cuerpo: `{ fechaInicio, fechaFinal, tipoInforme, guias: null, cedula }`. |
+| GET | `/Informes/ObtenerInformeDescuentoCliente?TipoDescuento&FechaInicio&FechaFinal&Cedula&NumeroPagina&TamanoPagina` | Tabla de descuentos y movilizados por cliente. |
+| POST | `/Informes/ObtenerInformeDescuento` | "Enviar reporte" / "Enviar". Cuerpo: `{ fechaInicio, fechaFinal, tipoInforme, guias: null, cedula }`. |
 
-> `tipoInforme` usa el valor `2` (`TipoInformeDescuento.VentasDetallado` en
-> `ventas-descuento.model.ts`). El swagger no publica los nombres del enum: confirmar con el backend.
+> El swagger publica los valores de los enums, no sus nombres. **Por confirmar con el backend**:
+>
+> - `TipoDescuento` (`descuentos-cliente.model.ts`): 1 = personalizados, 2 = automáticos.
+> - `TipoInformeDescuento` (`informe-descuento.model.ts`): 1 = descuentos personalizados,
+>   2 = descuentos automáticos, 3 = detalle de ventas con descuento.
 
 ## Desarrollo
 
 ```bash
 pnpm install
-pnpm start             # http://localhost:4205/ventas-descuento
+pnpm start             # http://localhost:4205/ventas-descuento y /movilizados-cliente
 pnpm build
 ```
 
@@ -57,7 +78,9 @@ fuera de las pruebas y de la cobertura. Los datos de ejemplo del API están en `
 ```
 src/app/
   core/          configuración del API, envoltura de respuestas, fechas, formatos y servicios
-  shared/        tabla (TanStack), paginador, selector de periodo y estados vacío / error
-  features/discount-sales/   pantalla, columnas y modal "Enviar reporte"
+  shared/        tabla (TanStack), filtros, buscador, paginador, selector de periodo, modal de
+                 envío, estados vacío / error y el estado común de los reportes
+  features/discount-sales/       ventas con descuento
+  features/mobilized/            descuentos y movilizados por cliente
 libs/ui/         componentes de spartan.ng (helm) con los ajustes del sistema de diseño
 ```

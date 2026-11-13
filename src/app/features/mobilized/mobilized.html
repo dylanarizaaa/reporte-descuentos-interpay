@@ -1,1 +1,90 @@
-<p>mobilized works!</p>
+<header class="flex flex-col gap-1 border-b border-gris-rafaga p-6">
+  <h1 class="text-xl leading-7 font-normal">Reporte de descuentos y movilizados por cliente</h1>
+  <p class="text-sm leading-5">Consulta y gestiona el detalle de los descuentos aplicados.</p>
+</header>
+
+<div class="p-6">
+  <div hlmTabs [tab]="tab().id" (tabActivated)="cambiarTab($event)">
+    <div hlmTabsList class="w-fit" aria-label="Tipo de descuento">
+      @for (item of tabs; track item.id) {
+        <button [hlmTabsTrigger]="item.id">
+          <!-- Reserva el ancho del texto en SemiBold (hover / seleccionada) para que la fila no salte. -->
+          <span
+            class="inline-flex flex-col items-center after:invisible after:h-0 after:overflow-hidden after:font-semibold after:content-[attr(data-label)]"
+            [attr.data-label]="item.label"
+          >
+            {{ item.label }}
+          </span>
+        </button>
+      }
+    </div>
+
+    @for (item of tabs; track item.id) {
+      <div [hlmTabsContent]="item.id">
+        @if (item.id === tab().id) {
+          <ng-container *ngTemplateOutlet="reporte" />
+        }
+      </div>
+    }
+  </div>
+</div>
+
+<ng-template #reporte>
+  <div class="flex flex-col gap-6">
+    <app-report-filters
+      [periodo]="query.periodo()"
+      [cedula]="query.cedula()"
+      [busquedaHabilitada]="resultados.busquedaHabilitada()"
+      [envioHabilitado]="resultados.hayResultados()"
+      (consultar)="consultar($event)"
+      (enviar)="envio.set({ cedula: query.cedula() })"
+    />
+
+    <h2 id="descuentos-cliente-tabla" class="sr-only">Descuentos y movilizados por cliente</h2>
+    <app-data-table
+      [table]="table"
+      [loading]="descuentos.isLoading()"
+      [skeletonRowCount]="10"
+      density="compact"
+      labelledBy="descuentos-cliente-tabla"
+    >
+      <div appDataTableEmpty class="contents">
+        @switch (resultados.estadoVacio()) {
+          @case ('error') {
+            <app-error-state
+              title="No pudimos consultar el reporte."
+              [description]="resultados.mensajeError()"
+              (retry)="descuentos.reload()"
+            />
+          }
+          @case ('sin-resultados') {
+            <app-empty-state title="No se encontraron registros" [lines]="lineasSinResultados()" />
+          }
+          @default {
+            <app-empty-state [lines]="['Elige un periodo para generar el reporte']" />
+          }
+        }
+      </div>
+    </app-data-table>
+
+    <app-paginator
+      class="self-end"
+      ariaLabel="Paginación de descuentos por cliente"
+      [page]="resultados.paginadorInactivo() ? 1 : query.pagina()"
+      [totalPages]="resultados.totalPages()"
+      [disabled]="resultados.paginadorInactivo()"
+      (pageChange)="query.goToPage($event)"
+    />
+  </div>
+</ng-template>
+
+<p class="sr-only" aria-live="polite">{{ resultados.anuncio() }}</p>
+
+@if (query.periodo()) {
+  <app-send-report-dialog
+    [open]="envio() !== null"
+    [request]="enviarInforme"
+    [texts]="textosEnvio"
+    (closed)="envio.set(null)"
+  />
+}

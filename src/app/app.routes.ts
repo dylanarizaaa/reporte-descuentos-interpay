@@ -10,8 +10,7 @@ export const routes: Routes = [
   {
     path: 'movilizados-cliente',
     title: 'Movilizados por cliente',
-    loadComponent: () =>
-      import('./features/mobilized/mobilized').then((c) => c.Mobilized),
+    loadComponent: () => import('./features/mobilized/mobilized').then((c) => c.Mobilized),
   },
 ];
 
