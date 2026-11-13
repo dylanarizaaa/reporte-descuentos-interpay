@@ -69,13 +69,6 @@ const COLUMNS: readonly ReportColumnSpec<DescuentoCliente>[] = [
     value: (row) => row.tipoDescuento,
   },
   {
-    id: 'rangoDescuento',
-    label: 'Rango de descuento',
-    kind: 'text',
-    size: 200,
-    value: (row) => row.rangoDescuento,
-  },
-  {
     id: 'movilizadosInterPay',
     label: 'Movilizados Inter Pay',
     kind: 'integer',

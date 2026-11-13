@@ -380,9 +380,9 @@ export class DataTable<TFeatures extends TableFeatures, TData extends RowData> {
     const position = column.getIsPinned();
     // "Columna" fija del handoff: divisor en Gris complementario.
     return position === 'start'
-      ? 'border-e border-e-gris-complementario'
+      ? 'border-e'
       : position === 'end'
-        ? 'border-s border-s-gris-complementario'
+        ? 'border-s'
         : '';
   }
 }
