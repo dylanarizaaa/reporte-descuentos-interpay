@@ -47,6 +47,7 @@ export function accionesColumn(
         inputs: {
           ariaLabel: `Enviar reporte de ${context.row.original.cliente?.nombreCliente ?? 'este cliente'}`,
           send: () => onSend(context.row.original),
+          disabled: !context.row.original.movilizadosInterPay,
         },
       }),
   };
@@ -56,8 +57,8 @@ export function accionesColumn(
 export function lineasSinResultados(cedula: string): string[] {
   return cedula
     ? [
-        'No hay descuentos para este No. de identificación en el periodo.',
-        'Intenta con otro número o periodo.',
-      ]
+      'No hay descuentos para este No. de identificación en el periodo.',
+      'Intenta con otro número o periodo.',
+    ]
     : ['No hay clientes con descuentos en este período.', 'Intenta con otro periodo.'];
 }

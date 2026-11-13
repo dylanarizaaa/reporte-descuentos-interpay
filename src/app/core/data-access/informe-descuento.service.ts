@@ -8,12 +8,14 @@ import type {
   InformeDescuentoGenerado,
   SolicitudInformeDescuento,
 } from './informe-descuento.model';
+import { StorageService } from '../services/storage.service';
 
 /** Genera los informes de descuentos (`/Informes/ObtenerInformeDescuento`) para enviarlos por correo. */
 @Injectable({ providedIn: 'root' })
 export class InformeDescuentoService {
   private readonly http = inject(HttpClient);
   private readonly baseUrl = inject(API_BASE_URL);
+  private readonly storage = inject(StorageService);
 
   /**
    * Genera el archivo del informe y lo envía por correo al usuario de la sesión (el backend lo
@@ -31,6 +33,11 @@ export class InformeDescuentoService {
           guias: null,
           cedula: cedula || null,
         },
+        {
+          headers: {
+            "IdToken": this.storage.token(),
+          }
+        }
       )
       .pipe(map(unwrapRespuesta));
   }
