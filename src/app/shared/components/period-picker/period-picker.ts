@@ -164,7 +164,7 @@ let nextId = 0;
         </div>
 
         <div
-          class="relative grid grid-cols-1 gap-6 sm:grid-cols-2 sm:gap-0 sm:divide-x sm:divide-gris-rafaga"
+          class="relative grid grid-cols-1 gap-6 sm:grid-cols-2 sm:gap-0"
         >
           <button
             hlmBtn
@@ -178,8 +178,9 @@ let nextId = 0;
           >
             <ng-icon name="lucideChevronLeft" aria-hidden="true" />
           </button>
+          <!-- Único divisor del diseño: entre los dos meses (borde final del primero). -->
           <app-month-grid
-            class="sm:pe-4"
+            class="sm:border-e sm:border-gris-rafaga sm:pe-4"
             [month]="viewMonth()"
             [draft]="draft()"
             [limits]="limits()"

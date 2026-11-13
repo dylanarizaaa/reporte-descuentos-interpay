@@ -38,7 +38,7 @@ Las pantallas de reportes comparten `app-report-filters` (campo de periodo proye
 
 ## API (CajaInter)
 
-La URL base se configura en `src/environments/environment.ts` (`apiBaseUrl`, hasta `/api/CajaInter`)
+La URL base se configura en `src/environments/environment.ts` (`apiUrl`, hasta `/api/CajaInter`)
 o con el token `API_BASE_URL`. Las respuestas usan la envoltura `RespuestaGeneral`
 (`error`, `mensaje`, `resultado`, `statusCode`, `descripcion`); con `error: true` se muestra `mensaje`.
 
