@@ -10,6 +10,7 @@ import { classes } from '@spartan-ng/helm/utils';
 })
 export class HlmDialogTitle {
   constructor() {
-    classes(() => 'text-base leading-none font-medium');
+    // Prospero no tiene peso 500: el título usa SemiBold.
+    classes(() => 'text-base leading-none font-semibold text-foreground');
   }
 }

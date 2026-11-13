@@ -61,7 +61,7 @@ export class HlmDialogContent {
       transform: booleanAttribute,
     },
   );
-  public readonly closeLabel = input<string>(this._dialogContext?.$closeLabel ?? 'Close');
+  public readonly closeLabel = input<string>(this._dialogContext?.$closeLabel ?? 'Cerrar');
 
   public readonly state = computed(() => this._dialogRef?.state() ?? 'closed');
 

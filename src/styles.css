@@ -5,38 +5,122 @@
 
 @import '@spartan-ng/brain/hlm-tailwind-preset.css';
 /* You can add global styles to this file, and also import other style files */
+@import './fonts.css';
+
+/*
+ * Paleta de marca (handoff de Figma). Se exponen como utilidades de Tailwind
+ * (`bg-gris-inicial`, `text-acento`, `shadow-capa-1`, `rounded-card`, ...) para que los
+ * componentes de `libs/ui` usen exactamente los mismos nombres que el diseño.
+ */
+@theme inline {
+  --color-negro-digital: var(--negro-digital);
+  --color-gris-medio: var(--gris-medio);
+  --color-gris-oscuro: var(--gris-oscuro);
+  --color-gris-rafaga: var(--gris-rafaga);
+  --color-gris-complementario: var(--gris-complementario);
+  --color-blanco-digital: var(--blanco-digital);
+  --color-gris-inicial: var(--gris-inicial);
+  --color-gris-espacial: var(--gris-espacial);
+  --color-acento: var(--acento);
+  --color-acento-oscuro: var(--acento-oscuro);
+  --color-exito: var(--exito);
+  --color-advertencia: var(--advertencia);
+  --color-terciario: var(--terciario);
+  --color-texto-hover: var(--texto-hover);
+  --color-primary-hover: var(--primary-hover);
+  --color-disabled: var(--disabled);
+  --color-disabled-foreground: var(--disabled-foreground);
+  --color-metric-label: var(--metric-label);
+
+  /* Tonos de estado ("Tabla estado"): fondo + texto con contraste AA (≥ 5.7:1). */
+  --color-badge-neutral: var(--badge-neutral);
+  --color-badge-neutral-foreground: var(--badge-neutral-foreground);
+  --color-badge-info: var(--badge-info);
+  --color-badge-info-foreground: var(--badge-info-foreground);
+  --color-badge-success: var(--badge-success);
+  --color-badge-success-foreground: var(--badge-success-foreground);
+  --color-badge-warning: var(--badge-warning);
+  --color-badge-warning-foreground: var(--badge-warning-foreground);
+  --color-badge-danger: var(--badge-danger);
+  --color-badge-danger-foreground: var(--badge-danger-foreground);
+}
+
+@theme {
+  /* "Shadow 1° Capa" de Figma (-2px 4px 12px 0px #575757) con la opacidad visible en el diseño. */
+  --shadow-capa-1: -2px 4px 12px 0 rgb(87 87 87 / 0.12);
+  --radius-card: 1rem;
+}
 
 :root {
   color-scheme: light;
 
+  /* Tokens primitivos de marca */
+  --negro-digital: #18191a;
+  --gris-medio: #727272;
+  --gris-oscuro: #575757;
+  --gris-rafaga: #e0e0e0;
+  --gris-complementario: #929292;
+  --blanco-digital: #fefefe;
+  --gris-inicial: #f9f9f9;
+  --gris-espacial: #f0f0f0;
+  --acento: #2569b3;
+  --acento-oscuro: #1f5a99;
+  /* Ícono "check-circle-new" del modal de resultado. */
+  --exito: #005a37;
+  /* Ícono de sobre del modal "¿Enviar el reporte por correo?". */
+  --advertencia: #b47b00;
+  /* "Pestañas": indicador de la pestaña seleccionada y texto al pasar el cursor. */
+  --terciario: #6e52e1;
+  --texto-hover: #3b4350;
+
+  /* Tokens semánticos derivados */
+  --primary-hover: var(--acento-oscuro);
+  --disabled: #dedede;
+  --disabled-foreground: var(--blanco-digital);
+  /* Gris un poco más oscuro que "Gris medio" para mantener contraste AA sobre "Gris espacial" (hover). */
+  --metric-label: #6b6b6b;
+
+  /* Tonos de estado. "Pendiente" (danger) se tomó del diseño de la tabla de casos. */
+  --badge-neutral: var(--gris-espacial);
+  --badge-neutral-foreground: var(--gris-oscuro);
+  --badge-info: #e8eff6;
+  --badge-info-foreground: var(--acento-oscuro);
+  --badge-success: #e8f4ec;
+  --badge-success-foreground: #1e6b3a;
+  --badge-warning: #fdf2e2;
+  --badge-warning-foreground: #8a4b00;
+  --badge-danger: #f8eeed;
+  --badge-danger-foreground: #a51d24;
+
   --font-sans:
-    -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans',
-    sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+    'Prospero', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial,
+    'Noto Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol',
+    'Noto Color Emoji';
 
   --chart-1: oklch(0.646 0.222 41.116);
   --chart-2: oklch(0.6 0.118 184.704);
   --chart-3: oklch(0.398 0.07 227.392);
   --chart-4: oklch(0.828 0.189 84.429);
   --chart-5: oklch(0.769 0.188 70.08);
-  --radius: 0.625rem;
+  --radius: 0.5rem;
   --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
+  --foreground: var(--negro-digital);
+  --card: var(--blanco-digital);
+  --card-foreground: var(--negro-digital);
+  --popover: var(--blanco-digital);
+  --popover-foreground: var(--negro-digital);
+  --primary: var(--acento);
+  --primary-foreground: var(--blanco-digital);
+  --secondary: var(--gris-espacial);
+  --secondary-foreground: var(--negro-digital);
+  --muted: var(--gris-inicial);
+  --muted-foreground: var(--gris-medio);
+  --accent: var(--gris-inicial);
+  --accent-foreground: var(--negro-digital);
   --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
+  --border: var(--gris-rafaga);
+  --input: var(--gris-rafaga);
+  --ring: var(--acento);
   --sidebar: oklch(0.985 0 0);
   --sidebar-foreground: oklch(0.145 0 0);
   --sidebar-primary: oklch(0.205 0 0);
@@ -83,10 +167,35 @@
   --sidebar-ring: oklch(0.556 0 0);
 }
 
+/*
+ * Barra de desplazamiento horizontal de las tablas ("Máscara tabla"): pista Gris ráfaga y
+ * control Gris complementario, 8px de alto y siempre visible.
+ */
+@utility scrollbar-brand {
+  &::-webkit-scrollbar {
+    height: 0.5rem;
+    width: 0.5rem;
+  }
+  &::-webkit-scrollbar-track {
+    border-radius: 9999px;
+    background-color: var(--gris-rafaga);
+  }
+  &::-webkit-scrollbar-thumb {
+    border-radius: 9999px;
+    background-color: var(--gris-complementario);
+  }
+  /* Firefox no tiene los pseudoelementos de WebKit. */
+  @supports (-moz-appearance: none) {
+    scrollbar-width: thin;
+    scrollbar-color: var(--gris-complementario) var(--gris-rafaga);
+  }
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
   }
+
   body {
     @apply bg-background text-foreground;
   }
