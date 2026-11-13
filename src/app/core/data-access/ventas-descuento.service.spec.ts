@@ -2,7 +2,7 @@ import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { firstValueFrom } from 'rxjs';
-import { INFORME_GENERADO, pagina } from '../../../testing/ventas-descuento.fixtures';
+import { pagina } from '../../../testing/ventas-descuento.fixtures';
 import { API_BASE_URL } from '../config/api-base-url';
 import { ApiError } from '../http/api-response';
 import { VentasDescuentoService } from './ventas-descuento.service';
@@ -83,26 +83,5 @@ describe('VentasDescuentoService', () => {
         descripcion: null,
       });
     await expect(result).rejects.toEqual(new ApiError('Periodo no procesado', 400));
-  });
-
-  it('pide el informe para enviarlo por correo', async () => {
-    const result = firstValueFrom(
-      service.enviarInforme({
-        fechaInicio: new Date(2026, 0, 23),
-        fechaFin: new Date(2026, 1, 22),
-        cedula: '',
-      }),
-    );
-    const req = http.expectOne(`${BASE}/Informes/ObtenerInformeDescuento`);
-    expect(req.request.method).toBe('POST');
-    expect(req.request.body).toEqual({
-      fechaInicio: '2026-01-23',
-      fechaFinal: '2026-02-22',
-      tipoInforme: 2,
-      guias: null,
-      cedula: null,
-    });
-    req.flush(INFORME_GENERADO);
-    expect((await result).correoEnviado).toBe(true);
   });
 });

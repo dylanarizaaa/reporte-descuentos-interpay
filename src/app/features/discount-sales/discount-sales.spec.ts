@@ -5,6 +5,7 @@ import {
   type TestRequest,
 } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
+import { By } from '@angular/platform-browser';
 import { provideRouter, Router } from '@angular/router';
 import { RouterTestingHarness } from '@angular/router/testing';
 import {
@@ -17,6 +18,7 @@ import {
 import { API_BASE_URL } from '../../core/config/api-base-url';
 import { TODAY } from '../../core/date/today';
 import { DiscountSales } from './discount-sales';
+import { PeriodPicker } from '../../shared/components/period-picker/period-picker';
 import { VENTAS_COLUMN_LABELS } from './discount-sales.columns';
 
 const API = '/api/Informes';
@@ -94,7 +96,7 @@ describe('DiscountSales', () => {
     [...element.querySelectorAll('button')].find(
       (item) => text(item) === name,
     ) as HTMLButtonElement;
-  const busqueda = () => element.querySelector<HTMLInputElement>('#ventas-descuento-busqueda')!;
+  const busqueda = () => element.querySelector<HTMLInputElement>('app-search-field input')!;
   const columna = (index: number) =>
     [...element.querySelectorAll('tbody tr')].map((row) => text(row.querySelectorAll('td')[index]));
   const paginador = () => text(element.querySelector('app-paginator'));
@@ -119,12 +121,10 @@ describe('DiscountSales', () => {
   it('"Consultar" escribe el periodo en la URL', async () => {
     await navigate();
     const router = TestBed.inject(Router);
-    const component = harness.routeDebugElement!.componentInstance as DiscountSales;
     // El selector de periodo tiene sus propias pruebas: aquí se simula "Aplicar".
-    (component as unknown as { periodoElegido: { set(value: unknown): void } }).periodoElegido.set({
-      inicio: new Date(2026, 0, 23),
-      fin: new Date(2026, 1, 22),
-    });
+    const picker = harness.routeDebugElement!.query(By.directive(PeriodPicker))
+      .componentInstance as PeriodPicker;
+    picker.periodoChange.emit({ inicio: new Date(2026, 0, 23), fin: new Date(2026, 1, 22) });
     harness.detectChanges();
 
     expect(button('Consultar').disabled).toBe(false);
@@ -298,7 +298,7 @@ describe('DiscountSales', () => {
       expect(solicitud.request.body).toEqual({
         fechaInicio: '2026-01-23',
         fechaFinal: '2026-02-22',
-        tipoInforme: 2,
+        tipoInforme: 3,
         guias: null,
         cedula: '1032456789',
       });

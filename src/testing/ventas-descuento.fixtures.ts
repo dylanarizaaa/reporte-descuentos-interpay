@@ -1,6 +1,6 @@
 import type { RespuestaGeneral } from '../app/core/http/api-response';
+import type { InformeDescuentoGenerado } from '../app/core/data-access/informe-descuento.model';
 import type {
-  InformeDescuentoGenerado,
   VentaDescuento,
   VentasDescuentoPagina,
 } from '../app/core/data-access/ventas-descuento.model';

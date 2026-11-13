@@ -51,31 +51,3 @@ export interface ConsultaVentasDescuento {
   readonly pagina: number;
   readonly cantidadRegistros: number;
 }
-
-/**
- * `EnumTipoInformeDescuento` del swagger. El swagger solo publica los valores (1, 2, 3), no sus
- * nombres. POR CONFIRMAR con el backend: se asume que 2 es el informe detallado de ventas con
- * descuento (el de esta tabla).
- */
-export const TipoInformeDescuento = {
-  VentasDetallado: 2,
-} as const;
-
-export type TipoInformeDescuento = (typeof TipoInformeDescuento)[keyof typeof TipoInformeDescuento];
-
-/** Datos para generar el archivo y enviarlo por correo ("Enviar reporte"). */
-export interface SolicitudInformeDescuento {
-  readonly fechaInicio: Date;
-  readonly fechaFin: Date;
-  readonly cedula?: string;
-}
-
-/** Resultado de `ObtenerInformeDescuento`. */
-export interface InformeDescuentoGenerado {
-  readonly urlDescarga: string | null;
-  readonly nombreArchivo: string | null;
-  /** ISO 8601 en UTC. */
-  readonly fechaExpiracionUtc: string;
-  readonly correoDestinatario: string | null;
-  readonly correoEnviado: boolean;
-}

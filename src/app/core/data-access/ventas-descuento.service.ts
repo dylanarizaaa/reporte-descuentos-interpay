@@ -4,13 +4,7 @@ import { map, type Observable } from 'rxjs';
 import { API_BASE_URL } from '../config/api-base-url';
 import { toIsoDate } from '../date/calendar-date';
 import { type RespuestaGeneral, unwrapRespuesta } from '../http/api-response';
-import {
-  type ConsultaVentasDescuento,
-  type InformeDescuentoGenerado,
-  type SolicitudInformeDescuento,
-  TipoInformeDescuento,
-  type VentasDescuentoPagina,
-} from './ventas-descuento.model';
+import type { ConsultaVentasDescuento, VentasDescuentoPagina } from './ventas-descuento.model';
 
 /**
  * Informes de ventas con descuento de CajaInter (`/Informes`).
@@ -37,26 +31,6 @@ export class VentasDescuentoService {
       .get<RespuestaGeneral<VentasDescuentoPagina>>(
         `${this.baseUrl}/Informes/ObtenerInformeDetalladoVentasDescuento`,
         { params },
-      )
-      .pipe(map(unwrapRespuesta));
-  }
-
-  /**
-   * Genera el archivo del informe y lo envía por correo al usuario de la sesión (el backend lo
-   * identifica por el token que agrega el orquestador).
-   */
-  enviarInforme(solicitud: SolicitudInformeDescuento): Observable<InformeDescuentoGenerado> {
-    const cedula = solicitud.cedula?.trim();
-    return this.http
-      .post<RespuestaGeneral<InformeDescuentoGenerado>>(
-        `${this.baseUrl}/Informes/ObtenerInformeDescuento`,
-        {
-          fechaInicio: toIsoDate(solicitud.fechaInicio),
-          fechaFinal: toIsoDate(solicitud.fechaFin),
-          tipoInforme: TipoInformeDescuento.VentasDetallado,
-          guias: null,
-          cedula: cedula || null,
-        },
       )
       .pipe(map(unwrapRespuesta));
   }

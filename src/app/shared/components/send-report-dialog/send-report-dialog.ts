@@ -16,10 +16,30 @@ import { lucideCircleCheck, lucideLoaderCircle, lucideMail } from '@ng-icons/luc
 import { BrnDialogClose } from '@spartan-ng/brain/dialog';
 import { HlmAlertDialogImports } from '@spartan-ng/helm/alert-dialog';
 import { HlmButton } from '@spartan-ng/helm/button';
-import { finalize } from 'rxjs';
-import { VentasDescuentoService } from '../../core/data-access/ventas-descuento.service';
-import type { Periodo } from '../../core/date/periodo';
-import { ApiError } from '../../core/http/api-response';
+import { finalize, type Observable } from 'rxjs';
+import { ApiError } from '../../../core/http/api-response';
+
+/** Textos del modal; cada reporte del diseño usa los suyos. */
+export interface SendReportTexts {
+  readonly title: string;
+  readonly description: string;
+  readonly cancelLabel: string;
+  readonly confirmLabel: string;
+  readonly successTitle: string;
+  readonly successDescription: string;
+  readonly successCloseLabel: string;
+}
+
+/** Textos del "Reporte de ventas con descuento". */
+export const DEFAULT_SEND_REPORT_TEXTS: SendReportTexts = {
+  title: '¿Enviar el reporte por correo?',
+  description: 'En máximo 30 minutos recibirás un enlace de descarga válido por 1 hora.',
+  cancelLabel: 'No enviar',
+  confirmLabel: 'Enviar',
+  successTitle: 'Tu reporte está en camino',
+  successDescription: 'Ya puedes cerrar esta ventana y continuar con tu operación.',
+  successCloseLabel: 'Cerrar',
+};
 
 /** Paso del flujo "Enviar reporte". */
 type Paso = 'confirmar' | 'enviado';
@@ -27,9 +47,9 @@ type Paso = 'confirmar' | 'enviado';
 let nextId = 0;
 
 /**
- * Flujo "Enviar reporte": confirma el envío ("¿Enviar el reporte por correo?"), pide el archivo
- * al backend y muestra "Tu reporte está en camino". Si la solicitud falla, el modal sigue abierto
- * con el error y se puede reintentar.
+ * Flujo "Enviar reporte": confirma el envío, ejecuta `request` (la petición que genera el archivo)
+ * y muestra el aviso de envío. Si la solicitud falla, el modal sigue abierto con el error y se
+ * puede reintentar.
  *
  * El correo destino lo resuelve el backend con el token de sesión que agrega el orquestador.
  */
@@ -39,6 +59,7 @@ let nextId = 0;
   providers: [provideIcons({ lucideCircleCheck, lucideLoaderCircle, lucideMail })],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
+    @let textos = texts();
     <hlm-alert-dialog
       [state]="open() ? 'open' : 'closed'"
       [disableClose]="enviando()"
@@ -58,9 +79,9 @@ let nextId = 0;
             aria-hidden="true"
           />
           <div class="flex flex-col gap-4">
-            <h2 hlmAlertDialogTitle class="text-lg leading-6">¿Enviar el reporte por correo?</h2>
+            <h2 hlmAlertDialogTitle class="text-lg leading-6">{{ textos.title }}</h2>
             <p hlmAlertDialogDescription class="text-base leading-5 text-gris-medio">
-              En máximo 30 minutos recibirás un enlace de descarga válido por 1 hora.
+              {{ textos.description }}
             </p>
             @if (error(); as error) {
               <p role="alert" class="text-sm text-destructive">{{ error }}</p>
@@ -73,7 +94,7 @@ let nextId = 0;
               class="border-gris-complementario text-base text-foreground"
               [disabled]="enviando()"
             >
-              No enviar
+              {{ textos.cancelLabel }}
             </button>
             <button
               hlmBtn
@@ -93,7 +114,7 @@ let nextId = 0;
                 />
                 Enviando…
               } @else {
-                Enviar
+                {{ textos.confirmLabel }}
               }
             </button>
           </div>
@@ -106,9 +127,9 @@ let nextId = 0;
             aria-hidden="true"
           />
           <div class="flex flex-col gap-4">
-            <h2 hlmAlertDialogTitle class="text-lg leading-6">Tu reporte está en camino</h2>
+            <h2 hlmAlertDialogTitle class="text-lg leading-6">{{ textos.successTitle }}</h2>
             <p hlmAlertDialogDescription class="text-base leading-5 text-gris-medio">
-              Ya puedes cerrar esta ventana y continuar con tu operación.
+              {{ textos.successDescription }}
             </p>
           </div>
           <button
@@ -119,7 +140,7 @@ let nextId = 0;
             class="w-full text-base"
             [id]="cerrarId"
           >
-            Cerrar
+            {{ textos.successCloseLabel }}
           </button>
         }
       </hlm-alert-dialog-content>
@@ -127,19 +148,17 @@ let nextId = 0;
   `,
 })
 export class SendReportDialog {
-  private readonly service = inject(VentasDescuentoService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly document = inject(DOCUMENT);
   private readonly injector = inject(Injector);
 
   /** Abre o cierra el modal. */
   readonly open = input<boolean>(false);
-  /** Periodo consultado (el de la tabla). */
-  readonly periodo = input.required<Periodo>();
-  /** No. de identificación consultado; vacío si no hay filtro. */
-  readonly cedula = input<string>('');
+  /** Petición que genera y envía el reporte; se ejecuta al confirmar. */
+  readonly request = input.required<() => Observable<unknown>>();
+  readonly texts = input<SendReportTexts>(DEFAULT_SEND_REPORT_TEXTS);
 
-  /** El usuario cerró el modal ("No enviar", "Cerrar" o Escape). */
+  /** El usuario cerró el modal (cancelar, cerrar o Escape). */
   readonly closed = output<void>();
 
   protected readonly paso = signal<Paso>('confirmar');
@@ -150,12 +169,7 @@ export class SendReportDialog {
   protected enviar(): void {
     this.enviando.set(true);
     this.error.set(null);
-    this.service
-      .enviarInforme({
-        fechaInicio: this.periodo().inicio,
-        fechaFin: this.periodo().fin,
-        cedula: this.cedula(),
-      })
+    this.request()()
       .pipe(
         finalize(() => this.enviando.set(false)),
         takeUntilDestroyed(this.destroyRef),
@@ -163,7 +177,7 @@ export class SendReportDialog {
       .subscribe({
         next: () => {
           this.paso.set('enviado');
-          // El botón "Enviar" desaparece: el foco pasa a "Cerrar" para no perderse.
+          // El botón de confirmar desaparece: el foco pasa al de cierre para no perderse.
           afterNextRender(() => this.document.getElementById(this.cerrarId)?.focus(), {
             injector: this.injector,
           });
