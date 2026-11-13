@@ -8,7 +8,6 @@ import { RouterOutlet } from '@angular/router';
 @Component({
   selector: 'app-root',
   imports: [RouterOutlet],
-  host: { class: 'block min-h-dvh bg-gris-espacial p-4 sm:p-6' },
-  template: '<main><router-outlet /></main>',
+  template: '<router-outlet />',
 })
-export class App {}
+export class App { }

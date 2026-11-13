@@ -1,122 +1,71 @@
-<section
-  class="flex flex-col rounded-card bg-card text-foreground shadow-capa-1"
-  aria-labelledby="ventas-descuento-titulo"
->
-  <header class="flex flex-col gap-1 border-b border-gris-rafaga p-6">
-    <h1 id="ventas-descuento-titulo" class="text-xl leading-7 font-normal">
-      Reporte de ventas con descuento
-    </h1>
-    <p class="text-sm leading-5">
-      Monitorea los costos y la aplicación de descuentos para clientes Inter Pay.
-    </p>
-  </header>
+<header class="flex flex-col gap-1 border-b border-gris-rafaga p-6">
+  <h1 id="ventas-descuento-titulo" class="text-xl leading-7 font-normal">
+    Reporte de ventas con descuento
+  </h1>
+  <p class="text-sm leading-5">
+    Monitorea los costos y la aplicación de descuentos para clientes Inter Pay.
+  </p>
+</header>
 
-  <div class="flex flex-col gap-6 p-6">
-    <div class="flex flex-wrap items-end gap-4">
-      <form
-        class="flex flex-wrap items-end gap-4"
-        aria-label="Filtros del reporte"
-        (submit)="consultar($event)"
-      >
-        <app-period-picker
-          class="w-full sm:w-[18.875rem]"
-          [periodo]="periodoElegido()"
-          (periodoChange)="periodoElegido.set($event)"
-        />
+<div class="flex flex-col gap-6 p-6">
+  <div class="flex flex-wrap items-end gap-4">
+    <form class="flex flex-wrap items-end gap-4" aria-label="Filtros del reporte" (submit)="consultar($event)">
+      <app-period-picker class="w-full sm:w-[18.875rem]" [periodo]="periodoElegido()"
+        (periodoChange)="periodoElegido.set($event)" />
 
-        <div class="relative w-full sm:w-[17.5rem]">
-          <label for="ventas-descuento-busqueda" class="sr-only"
-            >Buscar por No. identificación</label
-          >
-          <ng-icon
-            name="lucideSearch"
-            size="1.25rem"
-            class="pointer-events-none absolute start-3 top-2.5"
-            [class]="busqueda.enabled ? 'text-gris-medio' : 'text-gris-complementario'"
-            aria-hidden="true"
-          />
-          <input
-            id="ventas-descuento-busqueda"
-            type="search"
-            autocomplete="off"
-            maxlength="20"
-            placeholder="Buscar por No. identificación"
-            class="h-10 w-full rounded-lg border border-gris-rafaga bg-card ps-10 pe-3 text-sm text-foreground placeholder:text-gris-medio focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring disabled:cursor-not-allowed disabled:bg-gris-inicial"
-            [formControl]="busqueda"
-            [attr.aria-describedby]="busqueda.enabled ? null : 'ventas-descuento-busqueda-ayuda'"
-          />
-          <span id="ventas-descuento-busqueda-ayuda" class="sr-only">
-            Disponible cuando la consulta del periodo trae registros.
-          </span>
-        </div>
-
-        <button
-          hlmBtn
-          size="sm"
-          type="submit"
-          class="w-full sm:w-[7.75rem]"
-          [disabled]="!periodoElegido()"
-        >
-          Consultar
-        </button>
-      </form>
-
-      <button
-        type="button"
-        class="ms-auto inline-flex h-10 cursor-pointer items-center gap-2 rounded-lg px-1 text-sm font-semibold text-acento transition-colors hover:text-acento-oscuro focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring disabled:cursor-default disabled:text-disabled"
-        [disabled]="!hayResultados()"
-        (click)="envioAbierto.set(true)"
-      >
-        Enviar reporte
-        <ng-icon name="lucideSendHorizontal" size="1.5rem" strokeWidth="1.5" aria-hidden="true" />
-      </button>
-    </div>
-
-    <h2 id="ventas-descuento-tabla" class="sr-only">Ventas con descuento</h2>
-    <app-data-table
-      [table]="table"
-      [loading]="ventas.isLoading()"
-      [skeletonRowCount]="10"
-      density="compact"
-      labelledBy="ventas-descuento-tabla"
-    >
-      <div appDataTableEmpty class="contents">
-        @switch (estadoVacio()) {
-          @case ('error') {
-            <app-error-state
-              title="No pudimos consultar el reporte."
-              [description]="mensajeError()"
-              (retry)="reintentar()"
-            />
-          }
-          @case ('sin-resultados') {
-            <app-empty-state title="No se encontraron registros" [lines]="lineasSinResultados()" />
-          }
-          @default {
-            <app-empty-state [lines]="['Elige un periodo para generar el reporte']" />
-          }
-        }
+      <div class="relative w-full sm:w-[17.5rem]">
+        <label for="ventas-descuento-busqueda" class="sr-only">Buscar por No. identificación</label>
+        <ng-icon name="lucideSearch" size="1.25rem" class="pointer-events-none absolute start-3 top-2.5"
+          [class]="busqueda.enabled ? 'text-gris-medio' : 'text-gris-complementario'" aria-hidden="true" />
+        <input id="ventas-descuento-busqueda" type="search" autocomplete="off" maxlength="20"
+          placeholder="Buscar por No. identificación"
+          class="h-10 w-full rounded-lg border border-gris-rafaga bg-card ps-10 pe-3 text-sm text-foreground placeholder:text-gris-medio focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring disabled:cursor-not-allowed disabled:bg-gris-inicial"
+          [formControl]="busqueda"
+          [attr.aria-describedby]="busqueda.enabled ? null : 'ventas-descuento-busqueda-ayuda'" />
+        <span id="ventas-descuento-busqueda-ayuda" class="sr-only">
+          Disponible cuando la consulta del periodo trae registros.
+        </span>
       </div>
-    </app-data-table>
 
-    <app-paginator
-      class="self-end"
-      ariaLabel="Paginación de ventas con descuento"
-      [page]="paginadorInactivo() ? 1 : pageNumber()"
-      [totalPages]="totalPages()"
-      [disabled]="paginadorInactivo()"
-      (pageChange)="goToPage($event)"
-    />
+      <button hlmBtn size="sm" type="submit" class="w-full sm:w-[7.75rem]" [disabled]="!periodoElegido()">
+        Consultar
+      </button>
+    </form>
+
+    <button type="button"
+      class="ms-auto inline-flex h-10 cursor-pointer items-center gap-2 rounded-lg px-1 text-sm font-semibold text-acento transition-colors hover:text-acento-oscuro focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring disabled:cursor-default disabled:text-disabled"
+      [disabled]="!hayResultados()" (click)="envioAbierto.set(true)">
+      Enviar reporte
+      <ng-icon name="lucideSendHorizontal" size="1.5rem" strokeWidth="1.5" aria-hidden="true" />
+    </button>
   </div>
-</section>
+
+  <h2 id="ventas-descuento-tabla" class="sr-only">Ventas con descuento</h2>
+  <app-data-table [table]="table" [loading]="ventas.isLoading()" [skeletonRowCount]="10" density="compact"
+    labelledBy="ventas-descuento-tabla">
+    <div appDataTableEmpty class="contents">
+      @switch (estadoVacio()) {
+      @case ('error') {
+      <app-error-state title="No pudimos consultar el reporte." [description]="mensajeError()" (retry)="reintentar()" />
+      }
+      @case ('sin-resultados') {
+      <app-empty-state title="No se encontraron registros" [lines]="lineasSinResultados()" />
+      }
+      @default {
+      <app-empty-state [lines]="['Elige un periodo para generar el reporte']" />
+      }
+      }
+    </div>
+  </app-data-table>
+
+  <app-paginator class="self-end" ariaLabel="Paginación de ventas con descuento"
+    [page]="paginadorInactivo() ? 1 : pageNumber()" [totalPages]="totalPages()" [disabled]="paginadorInactivo()"
+    (pageChange)="goToPage($event)" />
+</div>
 
 <p class="sr-only" aria-live="polite">{{ anuncio() }}</p>
 
 @if (periodoConsultado(); as periodo) {
-  <app-send-report-dialog
-    [open]="envioAbierto()"
-    [periodo]="periodo"
-    [cedula]="cedulaConsultada()"
-    (closed)="envioAbierto.set(false)"
-  />
+<app-send-report-dialog [open]="envioAbierto()" [periodo]="periodo" [cedula]="cedulaConsultada()"
+  (closed)="envioAbierto.set(false)" />
 }
