@@ -31,7 +31,7 @@ export interface Envio {
 }
 
 export const descuentoRowId = (row: DescuentoCliente, index: number) =>
-  `${index}-${row.cliente?.idPrepagoCliente ?? 'sin-cliente'}`;
+  `${index}-${row.idPrepagoCliente}`;
 
 /** Columna "Acciones" con "Enviar" por cliente; `onSend` recibe la fila. */
 export function accionesColumn(
@@ -45,7 +45,7 @@ export function accionesColumn(
     cell: (context) =>
       flexRenderComponent(SendCell, {
         inputs: {
-          ariaLabel: `Enviar reporte de ${context.row.original.cliente?.nombreCliente ?? 'este cliente'}`,
+          ariaLabel: `Enviar reporte de ${context.row.original.nombreCliente ?? 'este cliente'}`,
           send: () => onSend(context.row.original),
           disabled: !context.row.original.movilizadosInterPay,
         },
@@ -57,8 +57,8 @@ export function accionesColumn(
 export function lineasSinResultados(cedula: string): string[] {
   return cedula
     ? [
-      'No hay descuentos para este No. de identificación en el periodo.',
-      'Intenta con otro número o periodo.',
-    ]
+        'No hay descuentos para este No. de identificación en el periodo.',
+        'Intenta con otro número o periodo.',
+      ]
     : ['No hay clientes con descuentos en este período.', 'Intenta con otro periodo.'];
 }

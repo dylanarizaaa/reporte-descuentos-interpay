@@ -9,10 +9,13 @@
   <app-processed-period-select
     appReportPeriod
     class="w-full sm:w-auto"
+    [anios]="anios()"
+    [anio]="anio()"
     [periodos]="listaPeriodos()"
     [value]="periodoElegido()"
     [loading]="periodos.isLoading()"
     [error]="periodos.status() === 'error'"
+    (anioChange)="anio.set($event)"
     (valueChange)="periodoElegido.set($event)"
     (retry)="periodos.reload()"
   />

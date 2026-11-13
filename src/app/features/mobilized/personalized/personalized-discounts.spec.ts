@@ -119,7 +119,7 @@ describe('PersonalizedDiscounts', () => {
   it('consulta los descuentos personalizados del periodo y pinta la tabla', async () => {
     await cargar();
 
-    expect(columna(0)).toEqual(DESCUENTOS.map((item) => item.cliente?.nombreCliente));
+    expect(columna(0)).toEqual(DESCUENTOS.map((item) => item.nombreCliente));
     const primera = [...element.querySelectorAll('tbody tr')[0].querySelectorAll('td')].map(text);
     expect(primera.slice(0, 7)).toEqual([
       'Carlos Rodríguez',
@@ -136,6 +136,24 @@ describe('PersonalizedDiscounts', () => {
     expect(text(element.querySelector('[aria-live="polite"]'))).toBe(
       '14 clientes con descuento. Página 1 de 2.',
     );
+  });
+
+  it('"Enviar" de la fila se desactiva si el cliente no tiene movilizados Inter Pay', async () => {
+    await navigate(URL_CONSULTA);
+    await settle();
+    expectDescuentos().flush(
+      paginaDescuentos({
+        listaResultado: [DESCUENTOS[0], { ...DESCUENTOS[1], movilizadosInterPay: 0 }],
+        totalElementos: 2,
+        totalPaginas: 1,
+      }),
+    );
+    await stable();
+
+    const enviar = (nombre: string) =>
+      element.querySelector<HTMLButtonElement>(`[aria-label="Enviar reporte de ${nombre}"]`)!;
+    expect(enviar('Carlos Rodríguez').disabled).toBe(false);
+    expect(enviar('María González').disabled).toBe(true);
   });
 
   it('busca por No. identificación con el input group y lo limpia con la X', async () => {

@@ -163,9 +163,7 @@ let nextId = 0;
           </div>
         </div>
 
-        <div
-          class="relative grid grid-cols-1 gap-6 sm:grid-cols-2 sm:gap-0"
-        >
+        <div class="relative grid grid-cols-1 gap-6 sm:grid-cols-2 sm:gap-0">
           <button
             hlmBtn
             variant="ghost"

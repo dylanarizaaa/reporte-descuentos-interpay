@@ -16,6 +16,7 @@ import { InformeDescuentoService } from '../../../core/data-access/informe-descu
 import type { PeriodoProcesado } from '../../../core/data-access/periodos-descuento.model';
 import { PeriodosDescuentoService } from '../../../core/data-access/periodos-descuento.service';
 import type { Periodo } from '../../../core/date/periodo';
+import { TODAY } from '../../../core/date/today';
 import { resourceValue } from '../../../core/resource/resource-value';
 import { type ConsultaReporte, injectReportQuery } from '../../../core/routing/report-query';
 import { DataTable } from '../../../shared/components/data-table/data-table';
@@ -38,10 +39,12 @@ import { ProcessedPeriodSelect } from './processed-period-select';
 
 const NO_PERIODOS: readonly PeriodoProcesado[] = [];
 
+/** Años hacia atrás que ofrece "Año" (además del actual), como el calendario de personalizados. */
+const ANIOS_ATRAS = 4;
+
 /**
- * Pestaña "Dtos. automáticos": el periodo se elige entre los ya procesados
- * (`ObtenerPeriodosDescuento`), filtrados por año. Sus fechas son las que se consultan y se
- * envían. La consulta vive en la URL (`?tipo=automaticos&desde=…&hasta=…&cedula=…&pagina=n`).
+ * Pestaña "Dtos. automáticos": el periodo se elige entre los ya procesados del año elegido
+ * (`ObtenerPeriodosDescuento?anio=`). Sus fechas son las que se consultan y se envían. La consulta vive en la URL (`?tipo=automaticos&desde=…&hasta=…&cedula=…&pagina=n`).
  */
 @Component({
   selector: 'app-automatic-discounts',
@@ -62,13 +65,30 @@ export class AutomaticDiscounts {
   private readonly service = inject(DescuentosClienteService);
   private readonly informes = inject(InformeDescuentoService);
   private readonly periodosService = inject(PeriodosDescuentoService);
+  private readonly today = inject(TODAY);
 
   protected readonly textosEnvio = TEXTOS_ENVIO;
   /** Los periodos los define el backend: no aplica el máximo de 30 días del calendario. */
   protected readonly query = injectReportQuery({ maxDays: Number.POSITIVE_INFINITY });
 
+  /** Años que se pueden consultar: el actual y los anteriores, del más reciente al más antiguo. */
+  protected readonly anios = computed(() => {
+    const actual = this.today().getFullYear();
+    return Array.from({ length: ANIOS_ATRAS + 1 }, (_, index) => actual - index);
+  });
+
+  /**
+   * Año elegido en "Año": el del periodo consultado o, sin consulta, el actual. Elegir otro año no
+   * cambia la URL hasta consultar.
+   */
+  protected readonly anio = linkedSignal<number>(
+    () => this.query.periodo()?.inicio.getFullYear() ?? this.today().getFullYear(),
+  );
+
+  /** Periodos procesados del año elegido (el backend exige el año). */
   protected readonly periodos = rxResource({
-    stream: () => this.periodosService.getPeriodos(),
+    params: () => this.anio(),
+    stream: ({ params: anio }) => this.periodosService.getPeriodos(anio),
   });
   protected readonly listaPeriodos = computed(() => resourceValue(this.periodos) ?? NO_PERIODOS);
 
@@ -106,7 +126,7 @@ export class AutomaticDiscounts {
   /** Orden del cliente: se aplica sobre la página recibida. */
   protected readonly sorting = signal<SortingState>([]);
   private readonly columns = automaticColumns((row) =>
-    this.envio.set({ cedula: row.cliente?.numeroDocumento ?? '' }),
+    this.envio.set({ cedula: row.numeroDocumento ?? '' }),
   );
 
   protected readonly table = injectTable(() => ({

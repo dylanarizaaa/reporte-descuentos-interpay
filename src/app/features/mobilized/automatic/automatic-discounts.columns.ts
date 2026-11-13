@@ -21,14 +21,14 @@ const COLUMNS: readonly ReportColumnSpec<DescuentoCliente>[] = [
     label: 'Nombre del cliente',
     kind: 'text',
     size: 200,
-    value: (row) => row.cliente?.nombreCliente,
+    value: (row) => row.nombreCliente,
   },
   {
     id: 'numeroDocumento',
     label: 'No. de identificación',
     kind: 'code',
     size: 204,
-    value: (row) => row.cliente?.numeroDocumento,
+    value: (row) => row.numeroDocumento,
   },
   {
     id: 'movilizadosMesAnterior',

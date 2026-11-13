@@ -92,7 +92,7 @@ export class PersonalizedDiscounts {
   /** Orden del cliente: se aplica sobre la página recibida. */
   protected readonly sorting = signal<SortingState>([]);
   private readonly columns = personalizedColumns((row) =>
-    this.envio.set({ cedula: row.cliente?.numeroDocumento ?? '' }),
+    this.envio.set({ cedula: row.numeroDocumento ?? '' }),
   );
 
   protected readonly table = injectTable(() => ({
