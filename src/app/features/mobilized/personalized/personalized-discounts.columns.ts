@@ -1,13 +1,16 @@
-import { type ColumnPinningState, flexRenderComponent } from '@tanstack/angular-table';
-import type { DescuentoCliente } from '../../core/data-access/descuentos-cliente.model';
-import { SendCell } from '../../shared/components/data-table/cells/send-cell';
+import type { ColumnPinningState } from '@tanstack/angular-table';
+import type { DescuentoCliente } from '../../../core/data-access/descuentos-cliente.model';
 import {
   reportColumn,
   type ReportColumnDef,
   type ReportColumnSpec,
-} from '../../shared/components/data-table/report-columns';
+} from '../../../shared/components/data-table/report-columns';
+import { accionesColumn } from '../mobilized.shared';
 
-/** Columnas en el orden del diseño; las que no se ven en él siguen el objeto del swagger. */
+/**
+ * Columnas de descuentos personalizados en el orden del diseño; las que no se ven en él siguen el
+ * objeto del swagger.
+ */
 const COLUMNS: readonly ReportColumnSpec<DescuentoCliente>[] = [
   {
     id: 'nombreCliente',
@@ -81,36 +84,18 @@ const COLUMNS: readonly ReportColumnSpec<DescuentoCliente>[] = [
   },
 ];
 
-/**
- * Columnas de la tabla y, al final, "Acciones" con "Enviar" por cliente. `onSend` recibe la fila
- * cuyo reporte se quiere enviar.
- */
-export function movilizadosColumns(
+/** Columnas de la tabla y, al final, "Acciones" con "Enviar" por cliente. */
+export function personalizedColumns(
   onSend: (row: DescuentoCliente) => void,
 ): ReportColumnDef<DescuentoCliente>[] {
-  return [
-    ...COLUMNS.map(reportColumn),
-    {
-      id: 'acciones',
-      header: 'Acciones',
-      size: 136,
-      enableSorting: false,
-      cell: (context) =>
-        flexRenderComponent(SendCell, {
-          inputs: {
-            ariaLabel: `Enviar reporte de ${context.row.original.cliente?.nombreCliente ?? 'este cliente'}`,
-            send: () => onSend(context.row.original),
-          },
-        }),
-    },
-  ];
+  return [...COLUMNS.map(reportColumn), accionesColumn(onSend)];
 }
 
 /** "Nombre del cliente" y "Acciones" quedan fijas al desplazar la tabla en horizontal. */
-export const MOVILIZADOS_COLUMN_PINNING: ColumnPinningState = {
+export const PERSONALIZED_COLUMN_PINNING: ColumnPinningState = {
   start: ['nombreCliente'],
   end: ['acciones'],
 };
 
 /** Etiquetas visibles de las columnas, en orden (incluye "Acciones"). */
-export const MOVILIZADOS_COLUMN_LABELS = [...COLUMNS.map((column) => column.label), 'Acciones'];
+export const PERSONALIZED_COLUMN_LABELS = [...COLUMNS.map((column) => column.label), 'Acciones'];

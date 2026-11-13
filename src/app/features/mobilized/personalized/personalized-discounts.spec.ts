@@ -11,12 +11,12 @@ import {
   DESCUENTOS,
   PAGINA_DESCUENTOS_VACIA,
   paginaDescuentos,
-} from '../../../testing/descuentos-cliente.fixtures';
-import { INFORME_GENERADO } from '../../../testing/ventas-descuento.fixtures';
-import { API_BASE_URL } from '../../core/config/api-base-url';
-import { TODAY } from '../../core/date/today';
-import { Mobilized } from './mobilized';
-import { MOVILIZADOS_COLUMN_LABELS } from './mobilized.columns';
+} from '../../../../testing/descuentos-cliente.fixtures';
+import { INFORME_GENERADO } from '../../../../testing/ventas-descuento.fixtures';
+import { API_BASE_URL } from '../../../core/config/api-base-url';
+import { TODAY } from '../../../core/date/today';
+import { PersonalizedDiscounts } from './personalized-discounts';
+import { PERSONALIZED_COLUMN_LABELS } from './personalized-discounts.columns';
 
 const API = '/api/Informes';
 const RUTA = '/movilizados-cliente';
@@ -25,7 +25,7 @@ const URL_CONSULTA = `${RUTA}?desde=2026-01-23&hasta=2026-02-22`;
 const text = (element: Element | null | undefined) =>
   element?.textContent?.replace(/\s+/g, ' ').trim() ?? '';
 
-describe('Mobilized', () => {
+describe('PersonalizedDiscounts', () => {
   let harness: RouterTestingHarness;
   let http: HttpTestingController;
   let element: HTMLElement;
@@ -33,7 +33,7 @@ describe('Mobilized', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       providers: [
-        provideRouter([{ path: 'movilizados-cliente', component: Mobilized }]),
+        provideRouter([{ path: 'movilizados-cliente', component: PersonalizedDiscounts }]),
         provideHttpClient(),
         provideHttpClientTesting(),
         { provide: API_BASE_URL, useValue: '/api' },
@@ -50,7 +50,7 @@ describe('Mobilized', () => {
 
   async function navigate(url = RUTA): Promise<void> {
     harness = await RouterTestingHarness.create();
-    await harness.navigateByUrl(url, Mobilized);
+    await harness.navigateByUrl(url, PersonalizedDiscounts);
     element = harness.routeNativeElement!;
   }
 
@@ -90,7 +90,6 @@ describe('Mobilized', () => {
     await stable();
   }
 
-  const tabs = () => [...element.querySelectorAll<HTMLButtonElement>('[role="tab"]')];
   const button = (name: string) =>
     [...element.querySelectorAll('button')].find(
       (item) => text(item) === name,
@@ -104,15 +103,11 @@ describe('Mobilized', () => {
       (item) => text(item) === name,
     ) as HTMLButtonElement;
 
-  it('sin periodo muestra las pestañas, los encabezados y el mensaje inicial', async () => {
+  it('sin periodo muestra el calendario, los encabezados y el mensaje inicial', async () => {
     await navigate();
 
-    expect(text(element.querySelector('h1'))).toBe(
-      'Reporte de descuentos y movilizados por cliente',
-    );
-    expect(tabs().map(text)).toEqual(['Dtos. personalizados', 'Dtos. automáticos']);
-    expect(tabs()[0].getAttribute('aria-selected')).toBe('true');
-    expect([...element.querySelectorAll('th')].map(text)).toEqual(MOVILIZADOS_COLUMN_LABELS);
+    expect(element.querySelector('app-period-picker')).not.toBeNull();
+    expect([...element.querySelectorAll('th')].map(text)).toEqual(PERSONALIZED_COLUMN_LABELS);
     expect(text(element.querySelector('app-empty-state'))).toBe(
       'Elige un periodo para generar el reporte',
     );
@@ -141,29 +136,6 @@ describe('Mobilized', () => {
     expect(text(element.querySelector('[aria-live="polite"]'))).toBe(
       '14 clientes con descuento. Página 1 de 2.',
     );
-  });
-
-  it('cambiar de pestaña conserva el periodo y pide los descuentos automáticos', async () => {
-    await cargar();
-    const router = TestBed.inject(Router);
-
-    tabs()[1].click();
-    await settle();
-
-    expect(router.url).toBe(`${URL_CONSULTA}&tipo=automaticos`);
-    expectDescuentos(2).flush(PAGINA_DESCUENTOS_VACIA);
-    await stable();
-    expect(tabs()[1].getAttribute('aria-selected')).toBe('true');
-    expect([...element.querySelectorAll('app-empty-state p')].map(text)).toEqual([
-      'No se encontraron registros',
-      'No hay clientes con descuentos en este período.',
-      'Intenta con otro periodo.',
-    ]);
-  });
-
-  it('abre directamente la pestaña de la URL', async () => {
-    await cargar(`${URL_CONSULTA}&tipo=automaticos`, 2);
-    expect(tabs()[1].getAttribute('aria-selected')).toBe('true');
   });
 
   it('busca por No. identificación con el input group y lo limpia con la X', async () => {
@@ -236,8 +208,8 @@ describe('Mobilized', () => {
       expect(dialog()).toBeNull();
     });
 
-    it('"Enviar reporte" pide el informe de la pestaña con la búsqueda consultada', async () => {
-      await cargar(`${URL_CONSULTA}&tipo=automaticos&cedula=30856789`, 2, '30856789');
+    it('"Enviar reporte" pide el informe de personalizados con la búsqueda consultada', async () => {
+      await cargar(`${URL_CONSULTA}&cedula=30856789`, 1, '30856789');
 
       button('Enviar reporte').click();
       await stable();
@@ -245,7 +217,7 @@ describe('Mobilized', () => {
       harness.detectChanges();
 
       const solicitud = http.expectOne(`${API}/ObtenerInformeDescuento`);
-      expect(solicitud.request.body.tipoInforme).toBe(2);
+      expect(solicitud.request.body.tipoInforme).toBe(1);
       expect(solicitud.request.body.cedula).toBe('30856789');
       solicitud.flush(INFORME_GENERADO);
       await stable();

@@ -18,20 +18,23 @@ peticiones HTTP; este micro front no tiene lógica de autenticación.
 
 ## Pantalla `movilizados-cliente`
 
-**Reporte de descuentos y movilizados por cliente.** Mismos filtros, tabla, paginación y envío
-que la pantalla anterior, con:
+**Reporte de descuentos y movilizados por cliente** (`features/mobilized`). `Mobilized` solo tiene
+las pestañas (tabs de spartan); cada una es una pantalla independiente con sus filtros, consulta y
+columnas. La pestaña activa vive en la URL (`?tipo=automaticos`) y al cambiarla se descarta la
+consulta de la anterior.
 
-| Elemento | Comportamiento |
-| --- | --- |
-| Pestañas | "Dtos. personalizados" y "Dtos. automáticos" (tabs de spartan). La activa vive en la URL (`?tipo=automaticos`); al cambiar se conserva el periodo y la búsqueda y se pide el otro `TipoDescuento`. |
-| Tabla | Columnas de `ResponseInformeDescuentoCliente`, con "Nombre del cliente" y "Acciones" fijas. |
-| Enviar (por fila) | Envía el informe de la pestaña solo para ese cliente (`cedula` de la fila). |
-| Enviar reporte | Envía el informe de la pestaña para el periodo y la búsqueda consultados. |
+| Pestaña | Periodo | Tabla |
+| --- | --- | --- |
+| Dtos. personalizados (`PersonalizedDiscounts`) | Calendario libre, máximo 30 días. | Nombre, identificación, fechas del descuento, movilizados, descuentos, tipo, rango y movilizados Inter Pay. |
+| Dtos. automáticos (`AutomaticDiscounts`) | "Año" y "Periodo" con los periodos procesados de `ObtenerPeriodosDescuento` (el año empieza en el más reciente; cambiarlo borra el periodo). Se consultan y envían las fechas del periodo. | Nombre, identificación, movilizados mes anterior y del periodo elegido, descuentos y rango. |
 
-Las dos pantallas comparten `app-report-filters` (periodo, buscador con input group de spartan,
-"Consultar" y "Enviar reporte"), `injectReportQuery` (consulta en la URL), `createReportResults`
-(estados de la tabla, búsqueda y paginador), `reportColumn` (formato y orden de columnas) y
-`app-send-report-dialog` (textos configurables).
+En ambas: "Nombre del cliente" y "Acciones" fijas; "Enviar" por fila envía el informe de ese
+cliente y "Enviar reporte" el de la consulta (con el `tipoInforme` de la pestaña).
+
+Las pantallas de reportes comparten `app-report-filters` (campo de periodo proyectado con
+`appReportPeriod`, buscador con input group, "Consultar" y "Enviar reporte"), `injectReportQuery`
+(consulta en la URL), `createReportResults` (estados de la tabla, búsqueda y paginador),
+`reportColumn` (formato y orden de columnas) y `app-send-report-dialog` (textos configurables).
 
 ## API (CajaInter)
 
@@ -43,6 +46,7 @@ o con el token `API_BASE_URL`. Las respuestas usan la envoltura `RespuestaGenera
 | --- | --- | --- |
 | GET | `/Informes/ObtenerInformeDetalladoVentasDescuento?FechaInicio&FechaFin&Cedula&Pagina&CantidadRegistros` | Datos de la tabla. Fechas sin hora (`AAAA-MM-DD`). |
 | GET | `/Informes/ObtenerInformeDescuentoCliente?TipoDescuento&FechaInicio&FechaFinal&Cedula&NumeroPagina&TamanoPagina` | Tabla de descuentos y movilizados por cliente. |
+| GET | `/Informes/ObtenerPeriodosDescuento` | Periodos procesados de descuentos automáticos. |
 | POST | `/Informes/ObtenerInformeDescuento` | "Enviar reporte" / "Enviar". Cuerpo: `{ fechaInicio, fechaFinal, tipoInforme, guias: null, cedula }`. |
 
 > El swagger publica los valores de los enums, no sus nombres. **Por confirmar con el backend**:
@@ -50,6 +54,8 @@ o con el token `API_BASE_URL`. Las respuestas usan la envoltura `RespuestaGenera
 > - `TipoDescuento` (`descuentos-cliente.model.ts`): 1 = personalizados, 2 = automáticos.
 > - `TipoInformeDescuento` (`informe-descuento.model.ts`): 1 = descuentos personalizados,
 >   2 = descuentos automáticos, 3 = detalle de ventas con descuento.
+> - Automáticos: "Movilizados mes anterior" usa `movilizadosInterPay` y "Movilizados periodo
+>   elegido" usa `numeroMovilizados` (`automatic-discounts.columns.ts`).
 
 ## Desarrollo
 

@@ -1,0 +1,66 @@
+<app-report-filters
+  [periodo]="periodoElegido()"
+  [cedula]="query.cedula()"
+  [busquedaHabilitada]="resultados.busquedaHabilitada()"
+  [envioHabilitado]="resultados.hayResultados()"
+  (consultar)="consultar($event)"
+  (enviar)="envio.set({ cedula: query.cedula() })"
+>
+  <app-processed-period-select
+    appReportPeriod
+    class="w-full sm:w-auto"
+    [periodos]="listaPeriodos()"
+    [value]="periodoElegido()"
+    [loading]="periodos.isLoading()"
+    [error]="periodos.status() === 'error'"
+    (valueChange)="periodoElegido.set($event)"
+    (retry)="periodos.reload()"
+  />
+</app-report-filters>
+
+<h2 id="descuentos-automaticos-tabla" class="sr-only">Descuentos automáticos por cliente</h2>
+<app-data-table
+  [table]="table"
+  [loading]="descuentos.isLoading()"
+  [skeletonRowCount]="10"
+  density="compact"
+  labelledBy="descuentos-automaticos-tabla"
+>
+  <div appDataTableEmpty class="contents">
+    @switch (resultados.estadoVacio()) {
+      @case ('error') {
+        <app-error-state
+          title="No pudimos consultar el reporte."
+          [description]="resultados.mensajeError()"
+          (retry)="descuentos.reload()"
+        />
+      }
+      @case ('sin-resultados') {
+        <app-empty-state title="No se encontraron registros" [lines]="lineasSinResultados()" />
+      }
+      @default {
+        <app-empty-state [lines]="['Elige un periodo para generar el reporte']" />
+      }
+    }
+  </div>
+</app-data-table>
+
+<app-paginator
+  class="self-end"
+  ariaLabel="Paginación de descuentos automáticos"
+  [page]="resultados.paginadorInactivo() ? 1 : query.pagina()"
+  [totalPages]="resultados.totalPages()"
+  [disabled]="resultados.paginadorInactivo()"
+  (pageChange)="query.goToPage($event)"
+/>
+
+<p class="sr-only" aria-live="polite">{{ resultados.anuncio() }}</p>
+
+@if (query.periodo()) {
+  <app-send-report-dialog
+    [open]="envio() !== null"
+    [request]="enviarInforme"
+    [texts]="textosEnvio"
+    (closed)="envio.set(null)"
+  />
+}
