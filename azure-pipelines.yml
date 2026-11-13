@@ -1,0 +1,36 @@
+trigger:
+  branches:
+    include:
+      - Desarrollo
+      - QA
+      - Produccion
+pr:
+  branches:
+    include:
+      - Desarrollo
+      - QA
+      - Produccion
+pool:
+   vmImage: 'windows-latest'
+
+variables:
+  - ${{ if startsWith(variables['Build.SourceBranch'], 'refs/heads/De') }}:
+    - group: Angular_PortalFinanciero_MF_Rep_Descuentos_Interpay - Desarrollo
+    - group: Angular_PortalFinanciero_MF_Rep_Descuentos_Interpay - Desarrollo DevOps
+  - ${{ if startsWith(variables['Build.SourceBranch'], 'refs/heads/QA') }}:
+    - group: Angular_PortalFinanciero_MF_Rep_Descuentos_Interpay - QA
+    - group: Angular_PortalFinanciero_MF_Rep_Descuentos_Interpay - QA DevOps
+  - ${{ if startsWith(variables['Build.SourceBranch'], 'refs/heads/Prod') }}:
+    - group: Angular_PortalFinanciero_MF_Rep_Descuentos_Interpay - Produccion
+    - group: Angular_PortalFinanciero_MF_Rep_Descuentos_Interpay - Produccion DevOps
+
+resources:
+  repositories:
+    - repository: templates
+      type: git
+      name: servicios/DevOps-ConfiguracionesGenericas
+      ref: refs/tags/MasterTemplate
+      endpoint: DevOpsCrossProjectConnection
+
+stages:
+  - template: azure/stages/templates/AngularTemplate.yaml@templates
