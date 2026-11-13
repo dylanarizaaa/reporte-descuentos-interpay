@@ -8,7 +8,8 @@ import { HlmInput } from '@spartan-ng/helm/input';
 let nextId = 0;
 
 /**
- * Paginador "Página [n] de N" del handoff. Las flechas se deshabilitan en los extremos
+ * Paginador "Página [n] de N" del handoff: separación de 8px, campo de 50px y flechas de 32px
+ * sobre Gris inicial (borde Gris complementario cuando están inactivas). Las flechas se deshabilitan en los extremos
  * (variantes Default / Adelante activo / Atrás activo) y el campo permite saltar a una página.
  */
 @Component({
@@ -19,7 +20,7 @@ let nextId = 0;
   template: `
     <nav
       [attr.aria-label]="ariaLabel()"
-      class="flex items-center gap-2.5 text-sm"
+      class="flex items-center gap-2 text-sm"
       [class]="disabled() ? 'text-gris-medio' : 'text-foreground'"
     >
       <label [for]="inputId">Página</label>
@@ -29,7 +30,7 @@ let nextId = 0;
         type="text"
         inputmode="numeric"
         autocomplete="off"
-        class="h-8 w-[3.125rem] rounded-lg border-gris-complementario bg-card px-2 text-sm text-foreground focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-ring disabled:text-gris-medio disabled:opacity-100"
+        class="h-8 w-[3.125rem] rounded-lg border-gris-complementario bg-card px-2 text-sm text-foreground focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-ring disabled:bg-card disabled:text-gris-medio disabled:opacity-100"
         [formControl]="pageControl"
         [attr.aria-describedby]="totalId"
         (change)="commit()"
@@ -41,7 +42,7 @@ let nextId = 0;
         variant="ghost"
         size="icon-sm"
         type="button"
-        class="ms-0.5 rounded-full border border-foreground bg-card hover:bg-gris-inicial data-disabled:border-gris-complementario data-disabled:text-gris-complementario data-disabled:opacity-100 [&_ng-icon]:text-[length:--spacing(5)]"
+        class="rounded-full border border-foreground bg-gris-inicial hover:bg-gris-espacial data-disabled:border-gris-complementario data-disabled:text-gris-complementario data-disabled:opacity-100 [&_ng-icon]:text-[1.375rem]"
         aria-label="Página anterior"
         [disabled]="disabled() || page() <= 1"
         (click)="goTo(page() - 1)"
@@ -53,7 +54,7 @@ let nextId = 0;
         variant="ghost"
         size="icon-sm"
         type="button"
-        class="rounded-full border border-foreground bg-card hover:bg-gris-inicial data-disabled:border-gris-complementario data-disabled:text-gris-complementario data-disabled:opacity-100 [&_ng-icon]:text-[length:--spacing(5)]"
+        class="rounded-full border border-foreground bg-gris-inicial hover:bg-gris-espacial data-disabled:border-gris-complementario data-disabled:text-gris-complementario data-disabled:opacity-100 [&_ng-icon]:text-[1.375rem]"
         aria-label="Página siguiente"
         [disabled]="disabled() || page() >= totalPages()"
         (click)="goTo(page() + 1)"

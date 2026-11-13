@@ -65,7 +65,9 @@ export class HlmTBody {}
 })
 export class HlmTFoot {
   constructor() {
-    classes(() => 'bg-gris-inicial border-t border-gris-rafaga font-semibold [&>tr]:last:border-b-0');
+    classes(
+      () => 'bg-gris-inicial border-t border-gris-rafaga font-semibold [&>tr]:last:border-b-0',
+    );
   }
 }
 
@@ -96,10 +98,11 @@ export class HlmTr {
 })
 export class HlmTh {
   constructor() {
-    // Encabezado Gris inicial; arriba y a los lados forma el marco de la tabla.
+    // "Casilla Título": 48px, Gris inicial, texto Gris medio SemiBold 14 y padding 24.
+    // Arriba y a los lados forma el marco de la tabla.
     classes(
       () =>
-        'h-12 border-b border-gris-rafaga bg-gris-inicial px-4 text-start align-middle text-sm font-normal whitespace-nowrap text-muted-foreground first:border-s last:border-e [tr:first-child>&]:border-t [tr:first-child>&]:first:rounded-ss-lg [tr:first-child>&]:last:rounded-se-lg [&:has([role=checkbox])]:pe-0',
+        'h-12 border-b border-gris-rafaga bg-gris-inicial px-6 text-start align-middle text-sm font-semibold whitespace-nowrap text-gris-medio first:border-s last:border-e [tr:first-child>&]:border-t [tr:first-child>&]:first:rounded-ss-lg [tr:first-child>&]:last:rounded-se-lg [&:has([role=checkbox])]:pe-0',
     );
   }
 }
@@ -115,11 +118,11 @@ export class HlmTh {
 })
 export class HlmTd {
   constructor() {
-    // Filas de 72px separadas por Gris ráfaga; la última fila cierra el marco por abajo.
+    // "Casilla Info": filas separadas por Gris ráfaga y padding 24; la última fila cierra el marco.
     // Hover = Gris inicial al 60 % sobre el fondo de la tarjeta, ya mezclado para ser opaco.
     classes(
       () =>
-        'h-18 border-b border-gris-rafaga bg-card px-4 align-middle text-sm whitespace-nowrap text-muted-foreground transition-colors group-hover/row:bg-[color-mix(in_srgb,var(--gris-inicial)_60%,var(--card))] group-data-[state=selected]/row:bg-gris-inicial first:border-s last:border-e [tr:last-child>&]:first:rounded-es-lg [tr:last-child>&]:last:rounded-ee-lg [&:has([role=checkbox])]:pe-0',
+        'h-18 border-b border-gris-rafaga bg-card px-6 align-middle text-sm whitespace-nowrap text-muted-foreground transition-colors group-hover/row:bg-[color-mix(in_srgb,var(--gris-inicial)_60%,var(--card))] group-data-[state=selected]/row:bg-gris-inicial first:border-s last:border-e [tr:last-child>&]:first:rounded-es-lg [tr:last-child>&]:last:rounded-ee-lg [&:has([role=checkbox])]:pe-0',
     );
   }
 }

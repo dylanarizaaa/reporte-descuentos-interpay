@@ -23,14 +23,15 @@ import { injectTableHeaderContext } from '@tanstack/angular-table';
         (click)="toggle($event)"
       >
         {{ label() }}
-        <svg viewBox="0 0 8 12" class="h-3 w-2 shrink-0" aria-hidden="true">
+        <!-- "ordering" del handoff: 10.67 × 16 con flechas de 6 × 3 en Gris medio. -->
+        <svg viewBox="0 0 32 48" class="h-4 w-[0.667rem] shrink-0" aria-hidden="true">
           <path
-            d="M4 0 8 5H0z"
+            d="M16 12 25 21H7z"
             [attr.fill-opacity]="direction() === 'desc' ? 0.3 : 1"
             fill="currentColor"
           />
           <path
-            d="M4 12 0 7h8z"
+            d="M16 36 7 27h18z"
             [attr.fill-opacity]="direction() === 'asc' ? 0.3 : 1"
             fill="currentColor"
           />

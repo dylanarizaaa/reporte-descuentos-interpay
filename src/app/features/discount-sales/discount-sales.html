@@ -15,8 +15,8 @@
 
       <div class="relative w-full sm:w-[17.5rem]">
         <label for="ventas-descuento-busqueda" class="sr-only">Buscar por No. identificación</label>
-        <ng-icon name="lucideSearch" size="1.25rem" class="pointer-events-none absolute start-3 top-2.5"
-          [class]="busqueda.enabled ? 'text-gris-medio' : 'text-gris-complementario'" aria-hidden="true" />
+        <ng-icon name="lucideSearch" size="1rem" class="pointer-events-none absolute start-3 top-3 text-gris-complementario"
+          aria-hidden="true" />
         <input id="ventas-descuento-busqueda" type="search" autocomplete="off" maxlength="20"
           placeholder="Buscar por No. identificación"
           class="h-10 w-full rounded-lg border border-gris-rafaga bg-card ps-10 pe-3 text-sm text-foreground placeholder:text-gris-medio focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring disabled:cursor-not-allowed disabled:bg-gris-inicial"
@@ -27,13 +27,13 @@
         </span>
       </div>
 
-      <button hlmBtn size="sm" type="submit" class="w-full sm:w-[7.75rem]" [disabled]="!periodoElegido()">
+      <button hlmBtn size="sm" type="submit" class="w-full text-base sm:w-[7.75rem]" [disabled]="!periodoElegido()">
         Consultar
       </button>
     </form>
 
     <button type="button"
-      class="ms-auto inline-flex h-10 cursor-pointer items-center gap-2 rounded-lg px-1 text-sm font-semibold text-acento transition-colors hover:text-acento-oscuro focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring disabled:cursor-default disabled:text-disabled"
+      class="ms-auto inline-flex h-10 cursor-pointer items-center gap-1 rounded-lg px-1 text-base font-semibold text-acento transition-colors hover:text-acento-oscuro focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring disabled:cursor-default disabled:text-disabled"
       [disabled]="!hayResultados()" (click)="envioAbierto.set(true)">
       Enviar reporte
       <ng-icon name="lucideSendHorizontal" size="1.5rem" strokeWidth="1.5" aria-hidden="true" />
