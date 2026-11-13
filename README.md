@@ -1,59 +1,63 @@
-# ReporteDescuentosInterpay
+# Reporte de descuentos Inter Pay
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 21.2.29.
+Micro front (Angular 21 + Native Federation) con la pantalla **Reporte de ventas con descuento**:
+costos y descuentos aplicados a clientes Inter Pay. El orquestador carga las rutas expuestas en
+`./Routes` (`src/app/app.routes.ts`, `export default routes`) y agrega el token de sesión a las
+peticiones HTTP; este micro front no tiene lógica de autenticación.
 
-## Development server
+## Pantalla `ventas-descuento`
 
-To start a local development server, run:
+| Elemento | Comportamiento |
+| --- | --- |
+| Periodo | Calendario de dos meses: "Desde" y "Año" eligen el mes de la izquierda y "Hasta" muestra el siguiente. Primer clic = inicio, segundo = fin. Máximo **30 días** entre inicio y fin y sin fechas futuras. El rango se publica solo con "Aplicar". |
+| Buscar por No. identificación | Se habilita cuando la consulta del periodo trae registros (y sigue habilitado mientras haya una búsqueda aplicada). Se envía al pulsar "Consultar" o Enter. |
+| Consultar | Activo con un periodo aplicado. Escribe la consulta en la URL: `?desde=AAAA-MM-DD&hasta=AAAA-MM-DD&cedula=…&pagina=n`, así que recargar o volver atrás conserva el reporte. |
+| Tabla | Columnas del objeto `ResponseInformeDetalladoVentasDescuento`, con "No. de guía" fija al desplazar. El **orden es del cliente** (ordena la página recibida). Estados: inicial, cargando, resultados, sin registros y error con reintento. |
+| Paginación | **Del servidor**, 10 registros por página (`Pagina` / `CantidadRegistros`). |
+| Enviar reporte | Activo con resultados. Confirma, pide el archivo al backend y muestra "Tu reporte está en camino". El correo destino lo resuelve el backend con el token. |
 
-```bash
-ng serve
-```
+## API (CajaInter)
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+La URL base se configura en `src/environments/environment.ts` (`apiBaseUrl`, hasta `/api/CajaInter`)
+o con el token `API_BASE_URL`. Las respuestas usan la envoltura `RespuestaGeneral`
+(`error`, `mensaje`, `resultado`, `statusCode`, `descripcion`); con `error: true` se muestra `mensaje`.
 
-## Code scaffolding
+| Método | Ruta | Uso |
+| --- | --- | --- |
+| GET | `/Informes/ObtenerInformeDetalladoVentasDescuento?FechaInicio&FechaFin&Cedula&Pagina&CantidadRegistros` | Datos de la tabla. Fechas sin hora (`AAAA-MM-DD`). |
+| POST | `/Informes/ObtenerInformeDescuento` | "Enviar reporte". Cuerpo: `{ fechaInicio, fechaFinal, tipoInforme, guias: null, cedula }`. |
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+> `tipoInforme` usa el valor `2` (`TipoInformeDescuento.VentasDetallado` en
+> `ventas-descuento.model.ts`). El swagger no publica los nombres del enum: confirmar con el backend.
 
-```bash
-ng generate component component-name
-```
-
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
-
-```bash
-ng generate --help
-```
-
-## Building
-
-To build the project run:
-
-```bash
-ng build
-```
-
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
-
-## Running unit tests
-
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
+## Desarrollo
 
 ```bash
-ng test
+pnpm install
+pnpm start             # http://localhost:4205/ventas-descuento
+pnpm build
 ```
 
-## Running end-to-end tests
+## Pruebas
 
-For end-to-end (e2e) testing, run:
+Las pruebas unitarias usan [Jest](https://jestjs.io/) con
+[jest-preset-angular](https://thymikee.github.io/jest-preset-angular/) (`jest.config.js` y `setup-jest.ts`):
 
 ```bash
-ng e2e
+pnpm test               # todas las pruebas
+pnpm test:watch         # modo observación
+pnpm test:coverage      # con cobertura en coverage/
 ```
 
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
+Solo se ejecutan y miden los `*.spec.ts` de `src/`. Los componentes de spartan.ng en `libs/` quedan
+fuera de las pruebas y de la cobertura. Los datos de ejemplo del API están en `src/testing/`.
 
-## Additional Resources
+## Estructura
 
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+```
+src/app/
+  core/          configuración del API, envoltura de respuestas, fechas, formatos y servicios
+  shared/        tabla (TanStack), paginador, selector de periodo y estados vacío / error
+  features/discount-sales/   pantalla, columnas y modal "Enviar reporte"
+libs/ui/         componentes de spartan.ng (helm) con los ajustes del sistema de diseño
+```
