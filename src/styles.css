@@ -191,6 +191,26 @@
   }
 }
 
+/* Barra vertical de las listas desplegables: control Gris complementario sobre pista Gris espacial. */
+@utility scrollbar-lista {
+  &::-webkit-scrollbar {
+    width: 0.5rem;
+  }
+  &::-webkit-scrollbar-track {
+    margin-block: 0.5rem;
+    border-radius: 9999px;
+    background-color: var(--gris-espacial);
+  }
+  &::-webkit-scrollbar-thumb {
+    border-radius: 9999px;
+    background-color: var(--gris-complementario);
+  }
+  @supports (-moz-appearance: none) {
+    scrollbar-width: thin;
+    scrollbar-color: var(--gris-complementario) var(--gris-espacial);
+  }
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;

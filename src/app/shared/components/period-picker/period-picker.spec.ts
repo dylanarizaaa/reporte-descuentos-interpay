@@ -49,6 +49,18 @@ describe('PeriodPicker', () => {
       (item) => text(item) === name,
     ) as HTMLButtonElement;
   const headings = () => [...dialog()!.querySelectorAll('h3')].map(text);
+  /** Disparador de un select del calendario ("Desde" o "Año"), nombrado por su <label>. */
+  const combobox = (name: string) => {
+    const label = [...dialog()!.querySelectorAll('label')].find((item) => text(item) === name)!;
+    return document.getElementById(label.htmlFor) as HTMLButtonElement;
+  };
+  /** Opciones de la lista abierta (vive en su propio overlay, fuera del diálogo). */
+  const options = () => [...document.querySelectorAll<HTMLElement>('[role="option"]')];
+
+  async function choose(select: string, option: string): Promise<void> {
+    await click(combobox(select));
+    await click(options().find((item) => text(item) === option)!);
+  }
 
   async function open(): Promise<void> {
     trigger().click();
@@ -73,9 +85,9 @@ describe('PeriodPicker', () => {
 
     expect(dialog()?.getAttribute('aria-labelledby')).toBeTruthy();
     expect(headings()).toEqual(['Enero 2026', 'Febrero 2026']);
-    const [desde, anio] = [...dialog()!.querySelectorAll('select')];
-    expect(desde.value).toBe('0');
-    expect(anio.value).toBe('2026');
+    expect(combobox('Desde').getAttribute('role')).toBe('combobox');
+    expect(text(combobox('Desde'))).toBe('Enero');
+    expect(text(combobox('Año'))).toBe('2026');
     expect(dialog()!.querySelector<HTMLInputElement>('input[disabled]')!.value).toBe('Febrero');
     // No hay fechas futuras.
     expect(day('martes, 24 de febrero de 2026').getAttribute('aria-disabled')).toBe('true');
@@ -133,16 +145,20 @@ describe('PeriodPicker', () => {
 
   it('"Desde", "Año" y las flechas cambian los meses visibles dentro de los límites', async () => {
     await open();
-    const [desde, anio] = [...dialog()!.querySelectorAll('select')];
 
-    // Primero el año: en el actual, los meses futuros no se pueden elegir en "Desde".
-    anio.value = '2025';
-    anio.dispatchEvent(new Event('change'));
-    fixture.detectChanges();
-    desde.value = '10';
-    desde.dispatchEvent(new Event('change'));
-    fixture.detectChanges();
+    // Lista propia (no la nativa): los meses futuros del año actual están inactivos.
+    await click(combobox('Desde'));
+    expect(combobox('Desde').getAttribute('aria-expanded')).toBe('true');
+    const marzo = options().find((item) => text(item) === 'Marzo')!;
+    expect(marzo.getAttribute('aria-disabled')).toBe('true');
+    await click(options().find((item) => text(item) === 'Enero')!);
+
+    // Primero el año y luego el mes; elegir una opción no cierra el calendario.
+    await choose('Año', '2025');
+    await choose('Desde', 'Noviembre');
+    expect(dialog()).not.toBeNull();
     expect(headings()).toEqual(['Noviembre 2025', 'Diciembre 2025']);
+    expect(text(combobox('Desde'))).toBe('Noviembre');
 
     await click(dialog()!.querySelector<HTMLButtonElement>('[aria-label="Mes siguiente"]')!);
     expect(headings()).toEqual(['Diciembre 2025', 'Enero 2026']);
@@ -155,7 +171,6 @@ describe('PeriodPicker', () => {
     expect(
       dialog()!.querySelector<HTMLButtonElement>('[aria-label="Mes siguiente"]')!.disabled,
     ).toBe(true);
-    // Los meses futuros del año actual no se ofrecen en "Desde".
-    expect(desde.querySelector<HTMLOptionElement>('option[value="2"]')!.disabled).toBe(true);
+    expect(text(combobox('Año'))).toBe('2026');
   });
 });

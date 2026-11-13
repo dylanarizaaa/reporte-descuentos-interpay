@@ -33,7 +33,8 @@ import type { ClassValue } from 'clsx';
       <ng-content />
       <ng-icon
         name="lucideChevronDown"
-        class="text-muted-foreground text-[length:--spacing(4)] ms-auto"
+        class="text-foreground text-[length:--spacing(5)] ms-auto"
+        aria-hidden="true"
       />
     </button>
   `,
@@ -44,7 +45,8 @@ export class HlmSelectTrigger {
   public readonly userClass = input<ClassValue>('', { alias: 'class' });
   protected readonly _computedClass = computed(() =>
     hlm(
-      'border-input data-placeholder:text-muted-foreground dark:bg-input/30 dark:hover:bg-input/50 focus-visible:border-ring focus-visible:ring-ring/50 data-[matches-spartan-invalid=true]:ring-destructive/20 dark:data-[matches-spartan-invalid=true]:ring-destructive/40 data-[matches-spartan-invalid=true]:border-destructive dark:data-[matches-spartan-invalid=true]:border-destructive/50 gap-1.5 rounded-lg border bg-transparent py-2 ps-2.5 pe-2 text-sm transition-colors focus-visible:ring-3 data-[matches-spartan-invalid=true]:ring-3 data-[size=default]:h-8 data-[size=sm]:h-7 data-[size=sm]:rounded-[min(var(--radius-md),10px)] *:data-[slot=select-value]:gap-1.5 flex w-fit items-center justify-between whitespace-nowrap outline-none disabled:cursor-not-allowed disabled:opacity-50 *:data-[slot=select-value]:line-clamp-1 *:data-[slot=select-value]:flex *:data-[slot=select-value]:items-center [&_ng-icon]:pointer-events-none [&_ng-icon]:shrink-0',
+      // "Campos" del sistema de diseño: 40px, borde Gris ráfaga, texto de 16px y chevron Negro digital.
+      'border border-gris-rafaga bg-card text-gris-oscuro data-placeholder:text-gris-medio hover:border-gris-complementario aria-expanded:border-gris-complementario focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring data-[matches-spartan-invalid=true]:border-destructive gap-2 rounded-lg ps-3 pe-3 text-base transition-colors data-[size=default]:h-10 data-[size=sm]:h-8 data-[size=sm]:text-sm *:data-[slot=select-value]:gap-1.5 flex w-full cursor-pointer items-center justify-between whitespace-nowrap outline-none disabled:cursor-not-allowed disabled:bg-gris-inicial disabled:text-gris-medio *:data-[slot=select-value]:line-clamp-1 *:data-[slot=select-value]:flex *:data-[slot=select-value]:items-center [&_ng-icon]:pointer-events-none [&_ng-icon]:shrink-0',
       this.userClass(),
     ),
   );

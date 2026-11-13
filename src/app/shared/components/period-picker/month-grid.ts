@@ -73,7 +73,7 @@ const DAY_CLASS: Readonly<Record<DayRangeState, string>> = {
           @for (weekday of weekdays; track weekday.short) {
             <th
               scope="col"
-              class="pb-3 text-center text-xs font-normal text-gris-medio"
+              class="pb-2 text-center text-xs font-normal text-gris-medio"
               [attr.abbr]="weekday.long"
             >
               {{ weekday.short }}

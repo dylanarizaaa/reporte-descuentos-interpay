@@ -11,16 +11,12 @@ import {
   signal,
 } from '@angular/core';
 import { NgIcon, provideIcons } from '@ng-icons/core';
-import {
-  lucideCalendar,
-  lucideChevronDown,
-  lucideChevronLeft,
-  lucideChevronRight,
-} from '@ng-icons/lucide';
+import { lucideCalendar, lucideChevronLeft, lucideChevronRight } from '@ng-icons/lucide';
 import { provideBrnPopoverDefaultOptions } from '@spartan-ng/brain/popover';
 import type { BrnOverlayState } from '@spartan-ng/brain/overlay';
 import { HlmButton } from '@spartan-ng/helm/button';
 import { HlmPopoverImports } from '@spartan-ng/helm/popover';
+import { HlmSelectImports } from '@spartan-ng/helm/select';
 import {
   addDays,
   addMonths,
@@ -58,9 +54,9 @@ let nextId = 0;
  */
 @Component({
   selector: 'app-period-picker',
-  imports: [HlmButton, HlmPopoverImports, MonthGrid, NgIcon],
+  imports: [HlmButton, HlmPopoverImports, HlmSelectImports, MonthGrid, NgIcon],
   providers: [
-    provideIcons({ lucideCalendar, lucideChevronDown, lucideChevronLeft, lucideChevronRight }),
+    provideIcons({ lucideCalendar, lucideChevronLeft, lucideChevronRight }),
     // El rol y el nombre del diálogo los lleva el contenido (`role="dialog"` + `aria-labelledby`).
     provideBrnPopoverDefaultOptions({ role: null }),
   ],
@@ -98,41 +94,41 @@ let nextId = 0;
         />
       </button>
 
+      <!--
+        En pantallas bajas el CDK limita la altura del popover al espacio libre: el contenido se
+        desplaza dentro (overflow-y-auto) en lugar de salirse de la tarjeta. El mb-2 compensa los
+        8px de separación del campo, que el CDK no descuenta de ese espacio.
+      -->
       <div
         hlmPopoverContent
         *hlmPopoverPortal="let ctx"
         role="dialog"
         [attr.aria-labelledby]="ids.dialogTitle"
-        class="w-[min(40.5rem,calc(100vw-2rem))] gap-8 rounded-card border-0 bg-card p-6 shadow-capa-1 ring-0 sm:p-8"
+        class="w-[min(40.5rem,calc(100vw-2rem))] mb-2 gap-8 overflow-y-auto overscroll-contain rounded-card border-0 bg-card p-6 shadow-capa-1 ring-0 scrollbar-lista sm:p-8"
       >
         <h2 [id]="ids.dialogTitle" class="sr-only">Elige el periodo del reporte</h2>
 
         <div class="grid grid-cols-2 gap-4 sm:grid-cols-[1fr_1fr_auto]">
           <div class="flex flex-col gap-2">
             <label [for]="ids.desde" class="text-sm leading-5 text-foreground">Desde</label>
-            <div class="relative">
-              <select
-                [id]="ids.desde"
-                class="h-10 w-full cursor-pointer appearance-none rounded-lg border border-gris-rafaga bg-card ps-3 pe-10 text-base text-gris-oscuro focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
-                (change)="onMonthChange($event)"
-              >
-                @for (option of monthOptions(); track option.value) {
-                  <option
-                    [value]="option.value"
-                    [selected]="option.value === viewMonth().getMonth()"
-                    [disabled]="option.disabled"
-                  >
-                    {{ option.label }}
-                  </option>
-                }
-              </select>
-              <ng-icon
-                name="lucideChevronDown"
-                size="1.25rem"
-                class="pointer-events-none absolute end-3 top-2.5 text-foreground"
-                aria-hidden="true"
-              />
-            </div>
+            <hlm-select
+              [value]="viewMonth().getMonth()"
+              [itemToString]="monthName"
+              (valueChange)="onMonthChange($event)"
+            >
+              <hlm-select-trigger [buttonId]="ids.desde">
+                <hlm-select-value />
+              </hlm-select-trigger>
+              <hlm-select-content *hlmSelectPortal>
+                <hlm-select-group>
+                  @for (option of monthOptions(); track option.value) {
+                    <hlm-select-item [value]="option.value" [disabled]="option.disabled">
+                      {{ option.label }}
+                    </hlm-select-item>
+                  }
+                </hlm-select-group>
+              </hlm-select-content>
+            </hlm-select>
           </div>
 
           <div class="flex flex-col gap-2">
@@ -148,25 +144,22 @@ let nextId = 0;
 
           <div class="col-span-2 flex flex-col gap-2 sm:col-span-1">
             <label [for]="ids.anio" class="text-sm leading-5 text-foreground">Año</label>
-            <div class="relative">
-              <select
-                [id]="ids.anio"
-                class="h-10 w-full cursor-pointer appearance-none rounded-lg border border-gris-rafaga bg-card ps-3 pe-10 text-base text-gris-oscuro focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring sm:w-[6.5rem]"
-                (change)="onYearChange($event)"
-              >
-                @for (year of yearOptions(); track year) {
-                  <option [value]="year" [selected]="year === viewMonth().getFullYear()">
-                    {{ year }}
-                  </option>
-                }
-              </select>
-              <ng-icon
-                name="lucideChevronDown"
-                size="1.25rem"
-                class="pointer-events-none absolute end-3 top-2.5 text-foreground"
-                aria-hidden="true"
-              />
-            </div>
+            <hlm-select
+              class="sm:w-[6.5rem]"
+              [value]="viewMonth().getFullYear()"
+              (valueChange)="onYearChange($event)"
+            >
+              <hlm-select-trigger [buttonId]="ids.anio">
+                <hlm-select-value />
+              </hlm-select-trigger>
+              <hlm-select-content *hlmSelectPortal>
+                <hlm-select-group>
+                  @for (year of yearOptions(); track year) {
+                    <hlm-select-item [value]="year">{{ year }}</hlm-select-item>
+                  }
+                </hlm-select-group>
+              </hlm-select-content>
+            </hlm-select>
           </div>
         </div>
 
@@ -372,19 +365,25 @@ export class PeriodPicker {
     if (state === 'open' && this.popoverState() !== 'open') {
       this.resetDraft();
       // Como en el patrón "Date Picker Dialog" de ARIA APG, el foco entra en el día elegido (u hoy).
-      this.focusDay(this.tabbableDate());
+      // Sin desplazar el contenido: en pantallas bajas se sigue viendo la fila Desde / Hasta / Año.
+      this.focusDay(this.tabbableDate(), { preventScroll: true });
     }
     this.popoverState.set(state);
   }
 
-  protected onMonthChange(event: Event): void {
-    const month = Number((event.target as HTMLSelectElement).value);
-    this.setView(new Date(this.viewMonth().getFullYear(), month, 1));
+  /** Nombre del mes para el valor visible de "Desde". */
+  protected readonly monthName = (month: number) => MONTH_NAMES[month] ?? '';
+
+  protected onMonthChange(month: number | null | undefined): void {
+    if (typeof month === 'number') {
+      this.setView(new Date(this.viewMonth().getFullYear(), month, 1));
+    }
   }
 
-  protected onYearChange(event: Event): void {
-    const year = Number((event.target as HTMLSelectElement).value);
-    this.setView(new Date(year, this.viewMonth().getMonth(), 1));
+  protected onYearChange(year: number | null | undefined): void {
+    if (typeof year === 'number') {
+      this.setView(new Date(year, this.viewMonth().getMonth(), 1));
+    }
   }
 
   protected shiftView(months: number): void {
@@ -453,9 +452,9 @@ export class PeriodPicker {
     return isSameMonth(date, this.viewMonth()) || isSameMonth(date, this.nextMonth());
   }
 
-  private focusDay(date: Date): void {
+  private focusDay(date: Date, options?: FocusOptions): void {
     afterNextRender(
-      () => this.document.getElementById(`${this.ids.grid}-${toIsoDate(date)}`)?.focus(),
+      () => this.document.getElementById(`${this.ids.grid}-${toIsoDate(date)}`)?.focus(options),
       { injector: this.injector },
     );
   }

@@ -15,7 +15,8 @@ import { classes } from '@spartan-ng/helm/utils';
       align: 'start',
       sideOffset: 6,
     }),
-    provideBrnPopoverDefaultOptions({ role: null }),
+    // El foco se queda en el disparador (aria-activedescendant): la lista no lo recibe al abrir.
+    provideBrnPopoverDefaultOptions({ role: null, autoFocus: false }),
   ],
   hostDirectives: [
     {
