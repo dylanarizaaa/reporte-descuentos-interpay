@@ -37,9 +37,6 @@
             "port": 0
           }
         },
-        "test": {
-          "builder": "@angular/build:unit-test"
-        },
         "esbuild": {
           "builder": "@angular/build:application",
           "options": {
@@ -51,8 +48,12 @@
                 "input": "public"
               }
             ],
-            "styles": ["src/styles.css"],
-            "polyfills": ["es-module-shims"]
+            "styles": [
+              "src/styles.css"
+            ],
+            "polyfills": [
+              "es-module-shims"
+            ]
           },
           "configurations": {
             "production": {
