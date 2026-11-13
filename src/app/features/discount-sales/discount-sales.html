@@ -8,9 +8,12 @@
 </header>
 
 <div class="flex flex-col gap-6 p-6">
-  <app-report-filters [periodo]="query.periodo()" [cedula]="query.cedula()"
+  <app-report-filters [periodo]="periodoElegido()" [cedula]="query.cedula()"
     [busquedaHabilitada]="resultados.busquedaHabilitada()" [envioHabilitado]="resultados.hayResultados()"
-    (consultar)="consultar($event)" (enviar)="envioAbierto.set(true)" />
+    (consultar)="consultar($event)" (enviar)="envioAbierto.set(true)">
+    <app-period-picker appReportPeriod class="w-full sm:w-[18.875rem]" [periodo]="periodoElegido()"
+      (periodoChange)="periodoElegido.set($event)" />
+  </app-report-filters>
 
   <h2 id="ventas-descuento-tabla" class="sr-only">Ventas con descuento</h2>
   <app-data-table [table]="table" [loading]="ventas.isLoading()" [skeletonRowCount]="10" density="compact"

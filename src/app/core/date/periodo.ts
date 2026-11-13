@@ -29,15 +29,22 @@ export function isPeriodoValido(periodo: Periodo, maxDays = MAX_PERIOD_DAYS): bo
   );
 }
 
-/** Periodo a partir de los query params `desde` / `hasta` (`AAAA-MM-DD`); `null` si no es válido. */
-export function parsePeriodo(desde: string | undefined, hasta: string | undefined): Periodo | null {
+/**
+ * Periodo a partir de los query params `desde` / `hasta` (`AAAA-MM-DD`); `null` si no es válido.
+ * `maxDays` limita la duración (`Infinity` para periodos que define el backend).
+ */
+export function parsePeriodo(
+  desde: string | undefined,
+  hasta: string | undefined,
+  maxDays = MAX_PERIOD_DAYS,
+): Periodo | null {
   const inicio = parseIsoDate(desde);
   const fin = parseIsoDate(hasta);
   if (!inicio || !fin) {
     return null;
   }
   const periodo = { inicio, fin };
-  return isPeriodoValido(periodo) ? periodo : null;
+  return isPeriodoValido(periodo, maxDays) ? periodo : null;
 }
 
 export function periodoToParams(periodo: Periodo): { desde: string; hasta: string } {

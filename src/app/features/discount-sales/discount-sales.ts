@@ -1,10 +1,18 @@
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  inject,
+  linkedSignal,
+  signal,
+} from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { injectTable, type SortingState, type Updater } from '@tanstack/angular-table';
 import { throwError } from 'rxjs';
 import { TipoInformeDescuento } from '../../core/data-access/informe-descuento.model';
 import { InformeDescuentoService } from '../../core/data-access/informe-descuento.service';
 import type { VentaDescuento } from '../../core/data-access/ventas-descuento.model';
+import type { Periodo } from '../../core/date/periodo';
 import { VentasDescuentoService } from '../../core/data-access/ventas-descuento.service';
 import { type ConsultaReporte, injectReportQuery } from '../../core/routing/report-query';
 import { DataTable } from '../../shared/components/data-table/data-table';
@@ -12,6 +20,7 @@ import { REPORT_TABLE_FEATURES } from '../../shared/components/data-table/report
 import { EmptyState } from '../../shared/components/empty-state/empty-state';
 import { ErrorState } from '../../shared/components/error-state/error-state';
 import { Paginator } from '../../shared/components/paginator/paginator';
+import { PeriodPicker } from '../../shared/components/period-picker/period-picker';
 import { ReportFilters } from '../../shared/components/report-filters/report-filters';
 import { SendReportDialog } from '../../shared/components/send-report-dialog/send-report-dialog';
 import { createReportResults } from '../../shared/report/report-results';
@@ -31,7 +40,15 @@ const rowId = (row: VentaDescuento, index: number) => `${index}-${row.guia ?? 's
  */
 @Component({
   selector: 'app-discount-sales',
-  imports: [DataTable, EmptyState, ErrorState, Paginator, ReportFilters, SendReportDialog],
+  imports: [
+    DataTable,
+    EmptyState,
+    ErrorState,
+    Paginator,
+    PeriodPicker,
+    ReportFilters,
+    SendReportDialog,
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: { class: 'block' },
   templateUrl: './discount-sales.html',
@@ -41,6 +58,8 @@ export class DiscountSales {
   private readonly informes = inject(InformeDescuentoService);
 
   protected readonly query = injectReportQuery();
+  /** Periodo elegido en el calendario y aún sin consultar; empieza con el de la URL. */
+  protected readonly periodoElegido = linkedSignal<Periodo | null>(() => this.query.periodo());
 
   protected readonly ventas = rxResource({
     params: () => {

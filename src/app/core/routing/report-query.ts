@@ -1,6 +1,12 @@
 import { computed, inject, type Signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { parsePeriodo, type Periodo, periodoToParams, samePeriodo } from '../date/periodo';
+import {
+  MAX_PERIOD_DAYS,
+  parsePeriodo,
+  type Periodo,
+  periodoToParams,
+  samePeriodo,
+} from '../date/periodo';
 import { injectQueryParam } from './route-params';
 
 /** Filtros que aplica "Consultar". */
@@ -27,12 +33,17 @@ export interface ReportQuery {
   navigate(queryParams: Record<string, string | number | null>): void;
 }
 
+export interface ReportQueryOptions {
+  /** Días máximos del periodo de la URL (por defecto 30; `Infinity` para periodos del backend). */
+  readonly maxDays?: number;
+}
+
 /**
  * Estado de la consulta de un reporte en la URL:
  * `?desde=AAAA-MM-DD&hasta=AAAA-MM-DD&cedula=…&pagina=n`. Así recargar la página o volver atrás
  * conserva el reporte. Debe llamarse en un contexto de inyección.
  */
-export function injectReportQuery(): ReportQuery {
+export function injectReportQuery(options: ReportQueryOptions = {}): ReportQuery {
   const router = inject(Router);
   const route = inject(ActivatedRoute);
   const desde = injectQueryParam('desde');
@@ -40,7 +51,8 @@ export function injectReportQuery(): ReportQuery {
   const cedulaParam = injectQueryParam('cedula');
   const paginaParam = injectQueryParam('pagina');
 
-  const periodo = computed(() => parsePeriodo(desde(), hasta()), { equal: samePeriodo });
+  const maxDays = options.maxDays ?? MAX_PERIOD_DAYS;
+  const periodo = computed(() => parsePeriodo(desde(), hasta(), maxDays), { equal: samePeriodo });
   const cedula = computed(() => cedulaParam()?.trim() ?? '');
   const pagina = computed(() => {
     const page = Number.parseInt(paginaParam() ?? '', 10);

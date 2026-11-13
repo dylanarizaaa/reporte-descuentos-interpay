@@ -1,31 +1,30 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  effect,
-  input,
-  linkedSignal,
-  output,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, effect, input, output } from '@angular/core';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import { lucideSendHorizontal } from '@ng-icons/lucide';
 import { HlmButton } from '@spartan-ng/helm/button';
 import type { Periodo } from '../../../core/date/periodo';
 import type { ConsultaReporte } from '../../../core/routing/report-query';
-import { PeriodPicker } from '../period-picker/period-picker';
 import { SearchField } from '../search-field/search-field';
 
 /**
- * Filtros de los reportes: "Periodo", "Buscar por No. identificación", "Consultar" y, a la
- * derecha, "Enviar reporte".
+ * Filtros de los reportes: el campo de periodo de cada pantalla (contenido proyectado con
+ * `appReportPeriod`), "Buscar por No. identificación", "Consultar" y, a la derecha,
+ * "Enviar reporte".
  *
  * - "Consultar" se activa con un periodo elegido y emite el periodo y la búsqueda (Enter en el
  *   buscador también consulta).
  * - El buscador refleja la cédula consultada y solo se habilita con `busquedaHabilitada`.
+ *
+ * ```html
+ * <app-report-filters [periodo]="periodoElegido()" …>
+ *   <app-period-picker appReportPeriod … />
+ * </app-report-filters>
+ * ```
  */
 @Component({
   selector: 'app-report-filters',
-  imports: [HlmButton, NgIcon, PeriodPicker, ReactiveFormsModule, SearchField],
+  imports: [HlmButton, NgIcon, ReactiveFormsModule, SearchField],
   providers: [provideIcons({ lucideSendHorizontal })],
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: { class: 'flex flex-wrap items-end gap-4' },
@@ -35,11 +34,7 @@ import { SearchField } from '../search-field/search-field';
       aria-label="Filtros del reporte"
       (submit)="onSubmit($event)"
     >
-      <app-period-picker
-        class="w-full sm:w-[18.875rem]"
-        [periodo]="periodoElegido()"
-        (periodoChange)="periodoElegido.set($event)"
-      />
+      <ng-content select="[appReportPeriod]" />
 
       <app-search-field
         class="w-full sm:w-[17.5rem]"
@@ -52,7 +47,7 @@ import { SearchField } from '../search-field/search-field';
         size="sm"
         type="submit"
         class="w-full text-base sm:w-[7.75rem]"
-        [disabled]="!periodoElegido()"
+        [disabled]="!periodo()"
       >
         Consultar
       </button>
@@ -70,7 +65,7 @@ import { SearchField } from '../search-field/search-field';
   `,
 })
 export class ReportFilters {
-  /** Periodo consultado (el de la URL); el calendario empieza con él. */
+  /** Periodo elegido en el campo proyectado (aún sin consultar); sin él no se puede consultar. */
   readonly periodo = input<Periodo | null>(null);
   /** No. de identificación consultado. */
   readonly cedula = input<string>('');
@@ -81,8 +76,6 @@ export class ReportFilters {
   readonly consultar = output<ConsultaReporte>();
   readonly enviar = output<void>();
 
-  /** Periodo elegido en el calendario y aún sin consultar. */
-  protected readonly periodoElegido = linkedSignal<Periodo | null>(() => this.periodo());
   protected readonly busqueda = new FormControl('', { nonNullable: true });
 
   constructor() {
@@ -99,7 +92,7 @@ export class ReportFilters {
 
   protected onSubmit(event: Event): void {
     event.preventDefault();
-    const periodo = this.periodoElegido();
+    const periodo = this.periodo();
     if (!periodo) {
       return;
     }
