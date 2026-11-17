@@ -19,7 +19,7 @@ import { TODAY } from '../../../core/date/today';
 import { PersonalizedDiscounts } from './personalized-discounts';
 import { PERSONALIZED_COLUMN_LABELS } from './personalized-discounts.columns';
 
-const API = '/api/Informes';
+const API = '/api/CajaInter/Informes';
 const RUTA = '/movilizados-cliente';
 const URL_CONSULTA = `${RUTA}?desde=2026-01-23&hasta=2026-02-22`;
 

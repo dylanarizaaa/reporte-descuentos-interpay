@@ -19,7 +19,7 @@ import { TODAY } from '../../../core/date/today';
 import { AutomaticDiscounts } from './automatic-discounts';
 import { AUTOMATIC_COLUMN_LABELS } from './automatic-discounts.columns';
 
-const API = '/api/Informes';
+const API = '/api/CajaInter/Informes';
 const RUTA = '/movilizados-cliente?tipo=automaticos';
 /** Periodo procesado de diciembre de 2025 (de los fixtures). */
 const URL_DICIEMBRE = `${RUTA}&desde=2025-12-01&hasta=2025-12-31`;

@@ -13,6 +13,7 @@ describe('InformeDescuentoService', () => {
 
   beforeEach(() => {
     localStorage.setItem('pf.token', 'token-de-sesion');
+    localStorage.setItem('pf.userName', 'usuario.prueba');
     TestBed.configureTestingModule({
       providers: [
         provideHttpClient(),
@@ -40,8 +41,9 @@ describe('InformeDescuentoService', () => {
     );
     const req = http.expectOne('/api/CajaInter/Informes/ObtenerInformeDescuento');
     expect(req.request.method).toBe('POST');
-    // El backend identifica al destinatario del correo por el token de la sesión.
+    // El backend identifica al destinatario del correo por el token y el usuario de la sesión.
     expect(req.request.headers.get('IdToken')).toBe('token-de-sesion');
+    expect(req.request.headers.get('usuario')).toBe('usuario.prueba');
     expect(req.request.body).toEqual({
       fechaInicio: '2026-01-23',
       fechaFinal: '2026-02-22',
