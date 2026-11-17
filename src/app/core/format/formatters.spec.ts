@@ -66,6 +66,11 @@ describe('formatters', () => {
       expect(toDate('2026-04-19T17:00:00-05:00')?.toISOString()).toBe('2026-04-19T22:00:00.000Z');
       expect(toDate('no es fecha')).toBeNull();
       expect(toDate(null)).toBeNull();
+      expect(toDate('')).toBeNull();
+      const fecha = new Date(2026, 0, 23);
+      expect(toDate(fecha)).toBe(fecha);
+      expect(toDate(new Date('no es fecha'))).toBeNull();
+      expect(toDate(Date.UTC(2026, 0, 23))?.toISOString()).toBe('2026-01-23T00:00:00.000Z');
     });
 
     it('formatea montos con moneda, signo y decimales', () => {
@@ -82,5 +87,14 @@ describe('formatters', () => {
       expect(formatNumber(3, { minimumFractionDigits: 2, maximumFractionDigits: 0 })).toBe('3,00');
       expect(plain(formatPercent(0.256))).toBe('25,6%');
     });
+  });
+
+  it('si Intl no devuelve alguna parte de la fecha, la deja vacía', () => {
+    const spy = jest
+      .spyOn(Intl.DateTimeFormat.prototype, 'formatToParts')
+      .mockReturnValue([{ type: 'literal', value: '' }]);
+    expect(formatLongDate(new Date(2026, 7, 17))).toBe(' de  ');
+    expect(formatDateTime(new Date(2026, 7, 17), { dateStyle: 'long' })).toBe(' de  ');
+    spy.mockRestore();
   });
 });

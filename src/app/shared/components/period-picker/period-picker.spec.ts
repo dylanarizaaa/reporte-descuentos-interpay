@@ -1,5 +1,6 @@
 import { Component, signal } from '@angular/core';
 import { type ComponentFixture, TestBed } from '@angular/core/testing';
+import { By } from '@angular/platform-browser';
 import type { Periodo } from '../../../core/date/periodo';
 import { TODAY } from '../../../core/date/today';
 import { PeriodPicker } from './period-picker';
@@ -172,5 +173,115 @@ describe('PeriodPicker', () => {
       dialog()!.querySelector<HTMLButtonElement>('[aria-label="Mes siguiente"]')!.disabled,
     ).toBe(true);
     expect(text(combobox('Año'))).toBe('2026');
+  });
+
+  describe('teclado', () => {
+    const focused = () => document.activeElement?.getAttribute('aria-label');
+
+    async function key(name: string): Promise<void> {
+      (document.activeElement as HTMLElement).dispatchEvent(
+        new KeyboardEvent('keydown', { key: name, bubbles: true }),
+      );
+      await fixture.whenStable();
+      fixture.detectChanges();
+      await fixture.whenStable();
+    }
+
+    it('mueve el foco por días, semanas y meses y desplaza la vista si hace falta', async () => {
+      await open();
+      day('lunes, 23 de febrero de 2026').focus();
+
+      await key('a');
+      expect(focused()).toBe('lunes, 23 de febrero de 2026');
+      await key('ArrowRight');
+      expect(focused()).toBe('martes, 24 de febrero de 2026');
+      await key('ArrowLeft');
+      expect(focused()).toBe('lunes, 23 de febrero de 2026');
+      await key('Home');
+      expect(focused()).toBe('domingo, 22 de febrero de 2026');
+      await key('End');
+      expect(focused()).toBe('sábado, 28 de febrero de 2026');
+      await key('ArrowUp');
+      expect(focused()).toBe('sábado, 21 de febrero de 2026');
+
+      // Fuera de los meses visibles (enero y febrero): la vista avanza un mes.
+      await key('ArrowDown');
+      expect(focused()).toBe('sábado, 28 de febrero de 2026');
+      await key('ArrowDown');
+      expect(focused()).toBe('sábado, 7 de marzo de 2026');
+      expect(headings()).toEqual(['Febrero 2026', 'Marzo 2026']);
+
+      // PageUp / PageDown van al mismo día del mes anterior / siguiente (o al último si no existe).
+      await key('PageUp');
+      expect(focused()).toBe('sábado, 7 de febrero de 2026');
+      await key('PageUp');
+      expect(focused()).toBe('miércoles, 7 de enero de 2026');
+      expect(headings()).toEqual(['Enero 2026', 'Febrero 2026']);
+      await key('PageDown');
+      expect(focused()).toBe('sábado, 7 de febrero de 2026');
+    });
+
+    it('no pasa del primer mes que se puede mostrar', async () => {
+      await open();
+      await choose('Año', '2022');
+      expect(headings()).toEqual(['Enero 2022', 'Febrero 2022']);
+
+      day('sábado, 1 de enero de 2022').focus();
+      await key('ArrowLeft');
+      expect(focused()).toBe('sábado, 1 de enero de 2022');
+      expect(headings()).toEqual(['Enero 2022', 'Febrero 2022']);
+      expect(
+        dialog()!.querySelector<HTMLButtonElement>('[aria-label="Mes anterior"]')!.disabled,
+      ).toBe(true);
+    });
+
+    it('la vista previa ignora días que no se pueden elegir', async () => {
+      await open();
+      await click(day('viernes, 23 de enero de 2026'));
+      day('martes, 24 de febrero de 2026').dispatchEvent(new MouseEvent('mouseenter'));
+      fixture.detectChanges();
+
+      expect(day('jueves, 29 de enero de 2026').parentElement?.getAttribute('aria-selected')).toBe(
+        'false',
+      );
+      day('jueves, 29 de enero de 2026').dispatchEvent(new MouseEvent('mouseenter'));
+      fixture.detectChanges();
+      expect(
+        day('miércoles, 28 de enero de 2026').parentElement?.getAttribute('aria-selected'),
+      ).toBe('true');
+      // Al salir del día, la vista previa vuelve al día con foco (el inicio): no queda rango.
+      day('jueves, 29 de enero de 2026').dispatchEvent(new MouseEvent('mouseleave'));
+      fixture.detectChanges();
+      expect(
+        day('miércoles, 28 de enero de 2026').parentElement?.getAttribute('aria-selected'),
+      ).toBe('false');
+
+      // Un día inactivo no cambia la selección al hacer clic.
+      await click(day('martes, 24 de febrero de 2026'));
+      expect(text(dialog()!.querySelector('[aria-live="polite"]'))).toContain('Fecha inicial');
+    });
+  });
+
+  it('ignora valores vacíos de los selects y "Aplicar" sin rango completo', async () => {
+    await open();
+    const picker = fixture.debugElement.query(By.directive(PeriodPicker))
+      .componentInstance as unknown as {
+      onMonthChange(month: number | null): void;
+      onYearChange(year: number | null): void;
+      apply(): void;
+    };
+
+    picker.onMonthChange(null);
+    picker.onYearChange(null);
+    picker.apply();
+    fixture.detectChanges();
+
+    expect(headings()).toEqual(['Enero 2026', 'Febrero 2026']);
+    expect(host.aplicados).toEqual([]);
+
+    // Un mes futuro no se puede mostrar a la izquierda: la vista queda en el mes actual.
+    picker.onMonthChange(10);
+    fixture.detectChanges();
+    expect(headings()).toEqual(['Febrero 2026', 'Marzo 2026']);
   });
 });

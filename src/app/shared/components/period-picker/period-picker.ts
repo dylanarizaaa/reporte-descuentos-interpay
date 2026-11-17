@@ -371,7 +371,7 @@ export class PeriodPicker {
   }
 
   /** Nombre del mes para el valor visible de "Desde". */
-  protected readonly monthName = (month: number) => MONTH_NAMES[month] ?? '';
+  protected readonly monthName = (month: number) => MONTH_NAMES[month];
 
   protected onMonthChange(month: number | null | undefined): void {
     if (typeof month === 'number') {

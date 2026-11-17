@@ -1,4 +1,10 @@
-import { formatPeriodo, isPeriodoValido, parsePeriodo, periodoToParams } from './periodo';
+import {
+  formatPeriodo,
+  isPeriodoValido,
+  parsePeriodo,
+  periodoToParams,
+  samePeriodo,
+} from './periodo';
 
 describe('periodo', () => {
   const inicio = new Date(2026, 0, 23);
@@ -20,5 +26,29 @@ describe('periodo', () => {
     expect(periodoToParams(periodo!)).toEqual({ desde: '2026-01-23', hasta: '2026-02-10' });
     expect(parsePeriodo('2026-01-23', undefined)).toBeNull();
     expect(parsePeriodo('2026-01-01', '2026-03-01')).toBeNull();
+  });
+
+  it('samePeriodo compara solo los días', () => {
+    const a = { inicio: new Date(2026, 0, 1, 10), fin: new Date(2026, 0, 31) };
+    expect(samePeriodo(a, { inicio: new Date(2026, 0, 1), fin: new Date(2026, 0, 31, 23) })).toBe(
+      true,
+    );
+    expect(samePeriodo(a, { inicio: new Date(2026, 0, 1), fin: new Date(2026, 0, 30) })).toBe(
+      false,
+    );
+    expect(samePeriodo(a, { inicio: new Date(2026, 0, 2), fin: new Date(2026, 0, 31) })).toBe(
+      false,
+    );
+    expect(samePeriodo(null, null)).toBe(true);
+    expect(samePeriodo(a, null)).toBe(false);
+    expect(samePeriodo(null, a)).toBe(false);
+  });
+
+  it('parsePeriodo acepta periodos largos si se amplía el máximo', () => {
+    expect(parsePeriodo('2026-01-01', '2026-03-31')).toBeNull();
+    expect(parsePeriodo('2026-01-01', '2026-03-31', Number.POSITIVE_INFINITY)).toEqual({
+      inicio: new Date(2026, 0, 1),
+      fin: new Date(2026, 2, 31),
+    });
   });
 });

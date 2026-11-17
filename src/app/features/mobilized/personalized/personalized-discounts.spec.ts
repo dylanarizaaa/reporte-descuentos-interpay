@@ -8,6 +8,7 @@ import { TestBed } from '@angular/core/testing';
 import { provideRouter, Router } from '@angular/router';
 import { RouterTestingHarness } from '@angular/router/testing';
 import {
+  descuento,
   DESCUENTOS,
   PAGINA_DESCUENTOS_VACIA,
   paginaDescuentos,
@@ -256,5 +257,59 @@ describe('PersonalizedDiscounts', () => {
     expectDescuentos().flush(paginaDescuentos());
     await stable();
     expect(element.querySelectorAll('tbody tr')).toHaveLength(10);
+  });
+
+  it('"Consultar" con la misma consulta vuelve a pedir los datos', async () => {
+    await cargar();
+
+    element.querySelector('form')!.dispatchEvent(new Event('submit'));
+    await settle();
+    expectDescuentos().flush(paginaDescuentos());
+    await stable();
+    expect(element.querySelectorAll('tbody tr')).toHaveLength(10);
+  });
+
+  it('un cliente sin nombre ni documento se puede enviar con la cédula vacía', async () => {
+    await navigate(URL_CONSULTA);
+    await settle();
+    expectDescuentos().flush(
+      paginaDescuentos({
+        listaResultado: [descuento({ nombreCliente: null, numeroDocumento: null })],
+        totalElementos: 1,
+        totalPaginas: 1,
+      }),
+    );
+    await stable();
+
+    element
+      .querySelector<HTMLButtonElement>('[aria-label="Enviar reporte de este cliente"]')!
+      .click();
+    await stable();
+    dialogButton('Sí, enviar').click();
+    harness.detectChanges();
+    const solicitud = http.expectOne(`${API}/ObtenerInformeDescuento`);
+    expect(solicitud.request.body.cedula).toBeNull();
+    solicitud.flush(INFORME_GENERADO);
+    await stable();
+  });
+
+  it('sin periodo o sin envío pendiente la petición de envío falla sin llamar al backend', async () => {
+    await navigate();
+    const page = harness.routeDebugElement!.componentInstance as unknown as {
+      enviarInforme(): import('rxjs').Observable<unknown>;
+    };
+    let error: unknown;
+    page.enviarInforme().subscribe({ error: (e: unknown) => (error = e) });
+    expect(error).toEqual(new Error('No hay un periodo consultado para enviar.'));
+  });
+
+  it('ordena en el cliente la página recibida', async () => {
+    await cargar();
+
+    const header = [...element.querySelectorAll('th')].find((th) => text(th) === 'Movilizados')!;
+    header.querySelector('button')!.click();
+    harness.detectChanges();
+    expect(header.getAttribute('aria-sort')).toBe('ascending');
+    expect(columna(0)[0]).toBe('Jorge Silva');
   });
 });

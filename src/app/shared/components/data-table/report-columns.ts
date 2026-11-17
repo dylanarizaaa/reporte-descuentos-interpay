@@ -1,6 +1,8 @@
+import type { WritableSignal } from '@angular/core';
 import {
   type ColumnDef,
   type RowData,
+  type SortingState,
   columnPinningFeature,
   columnSizingFeature,
   createSortedRowModel,
@@ -10,6 +12,7 @@ import {
   sortFn_basic,
   sortFn_text,
   tableFeatures,
+  type Updater,
 } from '@tanstack/angular-table';
 import {
   formatCurrency,
@@ -115,4 +118,15 @@ export function reportColumn<T extends RowData>(spec: ReportColumnSpec<T>): Repo
         spec.kind === 'text' ? 'overflow-hidden text-ellipsis text-foreground' : 'text-foreground',
     },
   };
+}
+
+/**
+ * `onSortingChange` de TanStack que guarda el orden en un signal (el orden es del cliente):
+ * TanStack envía el nuevo estado o una función que lo calcula a partir del actual.
+ */
+export function sortingChange(
+  sorting: WritableSignal<SortingState>,
+): (updater: Updater<SortingState>) => void {
+  return (updater) =>
+    sorting.update((current) => (typeof updater === 'function' ? updater(current) : updater));
 }

@@ -345,4 +345,24 @@ describe('DiscountSales', () => {
       expect(dialogButton('Enviar').disabled).toBe(false);
     });
   });
+
+  it('"Consultar" con la misma consulta vuelve a pedir los datos', async () => {
+    await cargar();
+
+    button('Consultar').click();
+    await settle();
+    expectVentas().flush(pagina({ listaResultado: [venta({ guia: null })], totalElementos: 1 }));
+    await stable();
+    expect(text(element.querySelector('tbody td'))).toBe('—Sin dato');
+  });
+
+  it('sin periodo consultado la petición de envío falla sin llamar al backend', async () => {
+    await navigate();
+    const page = harness.routeDebugElement!.componentInstance as unknown as {
+      enviarInforme(): import('rxjs').Observable<unknown>;
+    };
+    let error: unknown;
+    page.enviarInforme().subscribe({ error: (e: unknown) => (error = e) });
+    expect(error).toEqual(new Error('No hay un periodo consultado para enviar.'));
+  });
 });
