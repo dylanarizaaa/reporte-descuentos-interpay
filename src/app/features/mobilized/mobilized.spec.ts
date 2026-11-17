@@ -9,7 +9,7 @@ import { API_BASE_URL } from '../../core/config/api-base-url';
 import { TODAY } from '../../core/date/today';
 import { Mobilized } from './mobilized';
 
-const API = '/api/Informes';
+const API = '/api/CajaInter/Informes';
 const RUTA = '/movilizados-cliente';
 
 const text = (element: Element | null | undefined) =>

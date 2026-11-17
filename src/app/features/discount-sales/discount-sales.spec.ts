@@ -21,7 +21,7 @@ import { DiscountSales } from './discount-sales';
 import { PeriodPicker } from '../../shared/components/period-picker/period-picker';
 import { VENTAS_COLUMN_LABELS } from './discount-sales.columns';
 
-const API = '/api/Informes';
+const API = '/api/CajaInter/Informes';
 const URL_CONSULTA = '/ventas-descuento?desde=2026-01-23&hasta=2026-02-22';
 
 const text = (element: Element | null | undefined) =>
