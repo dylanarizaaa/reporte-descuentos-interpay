@@ -1,4 +1,4 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { map, type Observable } from 'rxjs';
 import { API_BASE_URL } from '../config/api-base-url';
@@ -13,11 +13,15 @@ export class PeriodosDescuentoService {
   private readonly http = inject(HttpClient);
   private readonly baseUrl = inject(API_BASE_URL);
 
-  /** Periodos con fechas válidas, del más reciente al más antiguo. */
-  getPeriodos(): Observable<PeriodoProcesado[]> {
+  /**
+   * Periodos procesados del año (`anio` es obligatorio para el backend), con fechas válidas y del
+   * más reciente al más antiguo.
+   */
+  getPeriodos(anio: number): Observable<PeriodoProcesado[]> {
     return this.http
       .get<RespuestaGeneral<readonly PeriodoProcesadoResponse[] | null>>(
         `${this.baseUrl}/Informes/ObtenerPeriodosDescuento`,
+        { params: new HttpParams().set('anio', anio) },
       )
       .pipe(
         map(unwrapRespuesta),

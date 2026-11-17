@@ -12,6 +12,7 @@ describe('InformeDescuentoService', () => {
   let http: HttpTestingController;
 
   beforeEach(() => {
+    localStorage.setItem('pf.token', 'token-de-sesion');
     TestBed.configureTestingModule({
       providers: [
         provideHttpClient(),
@@ -23,7 +24,10 @@ describe('InformeDescuentoService', () => {
     http = TestBed.inject(HttpTestingController);
   });
 
-  afterEach(() => http.verify());
+  afterEach(() => {
+    http.verify();
+    localStorage.clear();
+  });
 
   it('pide el informe del tipo indicado con fechas sin hora', async () => {
     const result = firstValueFrom(
@@ -36,6 +40,8 @@ describe('InformeDescuentoService', () => {
     );
     const req = http.expectOne('/api/Informes/ObtenerInformeDescuento');
     expect(req.request.method).toBe('POST');
+    // El backend identifica al destinatario del correo por el token de la sesión.
+    expect(req.request.headers.get('IdToken')).toBe('token-de-sesion');
     expect(req.request.body).toEqual({
       fechaInicio: '2026-01-23',
       fechaFinal: '2026-02-22',

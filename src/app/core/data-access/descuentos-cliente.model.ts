@@ -11,19 +11,15 @@ export const TipoDescuento = {
 
 export type TipoDescuento = (typeof TipoDescuento)[keyof typeof TipoDescuento];
 
-/** Cliente Inter Pay (`ResponseCliente`). */
-export interface ClienteDescuento {
+/**
+ * Descuento de un cliente Inter Pay y sus movilizados (`ResponseInformeDescuentoCliente`); los
+ * datos del cliente vienen en el primer nivel. `descuentoPagoEnCasa` y `descuentoFlete` son
+ * porcentajes (p. ej. 15 = 15 %).
+ */
+export interface DescuentoCliente {
   readonly idPrepagoCliente: number;
   readonly nombreCliente: string | null;
   readonly numeroDocumento: string | null;
-}
-
-/**
- * Descuento de un cliente y sus movilizados (`ResponseInformeDescuentoCliente`).
- * `descuentoPagoEnCasa` y `descuentoFlete` son porcentajes (p. ej. 15 = 15 %).
- */
-export interface DescuentoCliente {
-  readonly cliente: ClienteDescuento | null;
   readonly descuentoPagoEnCasa: number;
   readonly descuentoFlete: number;
   readonly tipoDescuento: string | null;

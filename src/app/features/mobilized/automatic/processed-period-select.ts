@@ -1,11 +1,4 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  computed,
-  input,
-  linkedSignal,
-  output,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, input, output } from '@angular/core';
 import { HlmSelectImports } from '@spartan-ng/helm/select';
 import type { PeriodoProcesado } from '../../../core/data-access/periodos-descuento.model';
 import { isSameDay } from '../../../core/date/calendar-date';
@@ -15,11 +8,11 @@ let nextId = 0;
 
 /**
  * "Año" y "Periodo" de los descuentos automáticos: los periodos no se eligen libremente, son los
- * ya procesados que devuelve `ObtenerPeriodosDescuento`.
+ * ya procesados que devuelve `ObtenerPeriodosDescuento` para el año elegido.
  *
- * - "Año" ofrece los años con periodos (del más reciente al más antiguo) y empieza en el del
- *   periodo elegido o, si no hay, en el más reciente.
- * - "Periodo" lista los del año elegido en orden cronológico. Cambiar de año borra el periodo.
+ * - "Año" lo controla quien usa el componente (`anio` / `anioChange`), porque los periodos se
+ *   piden por año.
+ * - "Periodo" lista los periodos recibidos en orden cronológico. Cambiar de año borra el periodo.
  */
 @Component({
   selector: 'app-processed-period-select',
@@ -52,7 +45,7 @@ let nextId = 0;
       <hlm-select
         [value]="periodoId()"
         [itemToString]="periodoLabel"
-        [disabled]="loading() || periodosDelAnio().length === 0"
+        [disabled]="loading() || periodosOrdenados().length === 0"
         (valueChange)="onPeriodChange($event)"
       >
         <hlm-select-trigger [buttonId]="ids.periodo">
@@ -60,7 +53,7 @@ let nextId = 0;
         </hlm-select-trigger>
         <hlm-select-content *hlmSelectPortal>
           <hlm-select-group>
-            @for (periodo of periodosDelAnio(); track periodo.id) {
+            @for (periodo of periodosOrdenados(); track periodo.id) {
               <hlm-select-item [value]="periodo.id">{{ format(periodo) }}</hlm-select-item>
             }
           </hlm-select-group>
@@ -83,13 +76,19 @@ let nextId = 0;
   `,
 })
 export class ProcessedPeriodSelect {
-  /** Periodos procesados (en cualquier orden). */
+  /** Años que se pueden consultar, en el orden en que se muestran. */
+  readonly anios = input<readonly number[]>([]);
+  /** Año elegido (`null` sin año: no hay periodos que mostrar). */
+  readonly anio = input<number | null>(null);
+  /** Periodos procesados del año elegido (en cualquier orden). */
   readonly periodos = input<readonly PeriodoProcesado[]>([]);
   /** Periodo elegido. */
   readonly value = input<Periodo | null>(null);
   readonly loading = input<boolean>(false);
   readonly error = input<boolean>(false);
 
+  /** Año elegido por el usuario. */
+  readonly anioChange = output<number>();
   /** Periodo elegido, o `null` al cambiar de año. */
   readonly valueChange = output<Periodo | null>();
   readonly retry = output<void>();
@@ -100,36 +99,8 @@ export class ProcessedPeriodSelect {
     periodo: `app-processed-period-select-${this.id}-periodo`,
   };
 
-  /** Años con periodos, del más reciente al más antiguo. */
-  protected readonly anios = computed(() =>
-    [...new Set(this.periodos().map((periodo) => periodo.inicio.getFullYear()))].sort(
-      (a, b) => b - a,
-    ),
-  );
-
-  /**
-   * Año elegido: el del periodo elegido; sin periodo (p. ej. justo después de cambiar de año) se
-   * conserva el anterior mientras exista, o se usa el más reciente.
-   */
-  protected readonly anio = linkedSignal<{ value: Periodo | null; anios: number[] }, number | null>(
-    {
-      source: () => ({ value: this.value(), anios: this.anios() }),
-      computation: ({ value, anios }, previous) => {
-        if (value) {
-          return value.inicio.getFullYear();
-        }
-        const anterior = previous?.value;
-        return anterior !== null && anterior !== undefined && anios.includes(anterior)
-          ? anterior
-          : (anios[0] ?? null);
-      },
-    },
-  );
-
-  protected readonly periodosDelAnio = computed(() =>
-    this.periodos()
-      .filter((periodo) => periodo.inicio.getFullYear() === this.anio())
-      .sort((a, b) => a.inicio.getTime() - b.inicio.getTime()),
+  protected readonly periodosOrdenados = computed(() =>
+    [...this.periodos()].sort((a, b) => a.inicio.getTime() - b.inicio.getTime()),
   );
 
   /** Id del periodo procesado que coincide con el elegido (`undefined` sin coincidencia). */
@@ -146,7 +117,7 @@ export class ProcessedPeriodSelect {
     if (this.loading()) {
       return 'Cargando periodos…';
     }
-    return this.periodos().length === 0 && !this.error()
+    return this.anio() !== null && this.periodos().length === 0 && !this.error()
       ? 'Sin periodos procesados'
       : 'DD/MM/AAAA – DD/MM/AAAA';
   });
@@ -166,7 +137,7 @@ export class ProcessedPeriodSelect {
     if (typeof year !== 'number' || year === this.anio()) {
       return;
     }
-    this.anio.set(year);
+    this.anioChange.emit(year);
     if (this.value()) {
       this.valueChange.emit(null);
     }

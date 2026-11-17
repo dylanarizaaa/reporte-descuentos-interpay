@@ -4,7 +4,7 @@ import { TestBed } from '@angular/core/testing';
 import { provideRouter, Router } from '@angular/router';
 import { RouterTestingHarness } from '@angular/router/testing';
 import { paginaDescuentos } from '../../../testing/descuentos-cliente.fixtures';
-import { PERIODOS } from '../../../testing/periodos-descuento.fixtures';
+import { PERIODOS_2026 } from '../../../testing/periodos-descuento.fixtures';
 import { API_BASE_URL } from '../../core/config/api-base-url';
 import { TODAY } from '../../core/date/today';
 import { Mobilized } from './mobilized';
@@ -52,6 +52,11 @@ describe('Mobilized', () => {
   }
 
   const tabs = () => [...element.querySelectorAll<HTMLButtonElement>('[role="tab"]')];
+  /** Periodos procesados del año actual (2026), que pide la pestaña de automáticos. */
+  const expectPeriodos = () =>
+    http.expectOne(
+      (req) => req.url === `${API}/ObtenerPeriodosDescuento` && req.params.get('anio') === '2026',
+    );
 
   it('muestra el encabezado y abre "Dtos. personalizados" con su calendario', async () => {
     await navigate();
@@ -63,7 +68,7 @@ describe('Mobilized', () => {
     expect(tabs()[0].getAttribute('aria-selected')).toBe('true');
     expect(element.querySelector('app-personalized-discounts app-period-picker')).not.toBeNull();
     expect(element.querySelector('app-automatic-discounts')).toBeNull();
-    http.expectNone(`${API}/ObtenerPeriodosDescuento`);
+    http.expectNone((req) => req.url === `${API}/ObtenerPeriodosDescuento`);
   });
 
   it('abre "Dtos. automáticos" desde la URL con sus propios filtros', async () => {
@@ -75,7 +80,7 @@ describe('Mobilized', () => {
       element.querySelector('app-automatic-discounts app-processed-period-select'),
     ).not.toBeNull();
     expect(element.querySelector('app-personalized-discounts')).toBeNull();
-    http.expectOne(`${API}/ObtenerPeriodosDescuento`).flush(PERIODOS);
+    expectPeriodos().flush(PERIODOS_2026);
   });
 
   it('cambiar de pestaña descarta la consulta de la anterior', async () => {
@@ -90,7 +95,7 @@ describe('Mobilized', () => {
     await settle();
 
     expect(router.url).toBe(`${RUTA}?tipo=automaticos`);
-    http.expectOne(`${API}/ObtenerPeriodosDescuento`).flush(PERIODOS);
+    expectPeriodos().flush(PERIODOS_2026);
     await settle();
     // Sin periodo de automáticos elegido no se consulta nada.
     http.expectNone((req) => req.url === `${API}/ObtenerInformeDescuentoCliente`);

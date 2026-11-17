@@ -15,7 +15,7 @@ import { lucideSendHorizontal } from '@ng-icons/lucide';
   template: `
     <button
       type="button"
-      class="-mx-1 inline-flex cursor-pointer items-center gap-1 rounded-sm px-1 text-base font-semibold text-acento transition-colors hover:text-acento-oscuro focus-visible:outline-2 focus-visible:outline-ring disabled:opacity-75"
+      class="-mx-1 inline-flex cursor-pointer items-center gap-1 rounded-sm px-1 text-base font-semibold text-acento transition-colors hover:text-acento-oscuro focus-visible:outline-2 focus-visible:outline-ring disabled:cursor-not-allowed disabled:opacity-75"
       [attr.aria-label]="ariaLabel()"
       (click)="send()()"
       [disabled]="disabled()"
@@ -29,5 +29,6 @@ export class SendCell {
   readonly label = input<string>('Enviar');
   readonly ariaLabel = input.required<string>();
   readonly send = input.required<() => void>();
-  public readonly disabled = input<boolean>(true);
+  /** La fila no tiene nada que enviar (p. ej. sin movilizados Inter Pay). */
+  readonly disabled = input<boolean>(false);
 }

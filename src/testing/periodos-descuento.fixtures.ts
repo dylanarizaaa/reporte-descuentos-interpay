@@ -23,7 +23,12 @@ export function periodosMensuales(
   return periodos;
 }
 
-/** Periodos de octubre de 2025 a enero de 2026. */
-export const PERIODOS: RespuestaGeneral<PeriodoProcesadoResponse[]> = respuesta(
-  periodosMensuales({ anio: 2025, mes: 10 }, { anio: 2026, mes: 1 }),
+/** Periodos procesados de 2025: octubre a diciembre. */
+export const PERIODOS_2025: RespuestaGeneral<PeriodoProcesadoResponse[]> = respuesta(
+  periodosMensuales({ anio: 2025, mes: 10 }, { anio: 2025, mes: 12 }),
+);
+
+/** Periodos procesados de 2026: solo enero. */
+export const PERIODOS_2026: RespuestaGeneral<PeriodoProcesadoResponse[]> = respuesta(
+  periodosMensuales({ anio: 2026, mes: 1 }, { anio: 2026, mes: 1 }),
 );

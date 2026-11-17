@@ -4,11 +4,11 @@ import { map, type Observable } from 'rxjs';
 import { API_BASE_URL } from '../config/api-base-url';
 import { toIsoDate } from '../date/calendar-date';
 import { type RespuestaGeneral, unwrapRespuesta } from '../http/api-response';
+import { StorageService } from '../session/storage.service';
 import type {
   InformeDescuentoGenerado,
   SolicitudInformeDescuento,
 } from './informe-descuento.model';
-import { StorageService } from '../services/storage.service';
 
 /** Genera los informes de descuentos (`/Informes/ObtenerInformeDescuento`) para enviarlos por correo. */
 @Injectable({ providedIn: 'root' })
@@ -18,8 +18,9 @@ export class InformeDescuentoService {
   private readonly storage = inject(StorageService);
 
   /**
-   * Genera el archivo del informe y lo envía por correo al usuario de la sesión (el backend lo
-   * identifica por el token que agrega el orquestador). Fechas sin hora (`AAAA-MM-DD`).
+   * Genera el archivo del informe y lo envía por correo al usuario de la sesión, que el backend
+   * identifica con el encabezado `IdToken` (token guardado por el orquestador). Fechas sin hora
+   * (`AAAA-MM-DD`).
    */
   enviar(solicitud: SolicitudInformeDescuento): Observable<InformeDescuentoGenerado> {
     const cedula = solicitud.cedula?.trim();
@@ -33,11 +34,7 @@ export class InformeDescuentoService {
           guias: null,
           cedula: cedula || null,
         },
-        {
-          headers: {
-            "IdToken": this.storage.token(),
-          }
-        }
+        { headers: { IdToken: this.storage.token() } },
       )
       .pipe(map(unwrapRespuesta));
   }

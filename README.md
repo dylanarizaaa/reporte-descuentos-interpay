@@ -26,7 +26,7 @@ consulta de la anterior.
 | Pestaña | Periodo | Tabla |
 | --- | --- | --- |
 | Dtos. personalizados (`PersonalizedDiscounts`) | Calendario libre, máximo 30 días. | Nombre, identificación, fechas del descuento, movilizados, descuentos, tipo, rango y movilizados Inter Pay. |
-| Dtos. automáticos (`AutomaticDiscounts`) | "Año" y "Periodo" con los periodos procesados de `ObtenerPeriodosDescuento` (el año empieza en el más reciente; cambiarlo borra el periodo). Se consultan y envían las fechas del periodo. | Nombre, identificación, movilizados mes anterior y del periodo elegido, descuentos y rango. |
+| Dtos. automáticos (`AutomaticDiscounts`) | "Año" (el actual y los cuatro anteriores; empieza en el del periodo consultado o en el actual) y "Periodo" con los periodos procesados de ese año (`ObtenerPeriodosDescuento?anio=`; sin año no se piden). Cambiar de año borra el periodo. Se consultan y envían las fechas del periodo. | Nombre, identificación, movilizados mes anterior y del periodo elegido, descuentos y rango. |
 
 En ambas: "Nombre del cliente" y "Acciones" fijas; "Enviar" por fila envía el informe de ese
 cliente y "Enviar reporte" el de la consulta (con el `tipoInforme` de la pestaña).
@@ -46,8 +46,8 @@ o con el token `API_BASE_URL`. Las respuestas usan la envoltura `RespuestaGenera
 | --- | --- | --- |
 | GET | `/Informes/ObtenerInformeDetalladoVentasDescuento?FechaInicio&FechaFin&Cedula&Pagina&CantidadRegistros` | Datos de la tabla. Fechas sin hora (`AAAA-MM-DD`). |
 | GET | `/Informes/ObtenerInformeDescuentoCliente?TipoDescuento&FechaInicio&FechaFinal&Cedula&NumeroPagina&TamanoPagina` | Tabla de descuentos y movilizados por cliente. |
-| GET | `/Informes/ObtenerPeriodosDescuento` | Periodos procesados de descuentos automáticos. |
-| POST | `/Informes/ObtenerInformeDescuento` | "Enviar reporte" / "Enviar". Cuerpo: `{ fechaInicio, fechaFinal, tipoInforme, guias: null, cedula }`. |
+| GET | `/Informes/ObtenerPeriodosDescuento?anio` | Periodos procesados de descuentos automáticos del año (obligatorio). |
+| POST | `/Informes/ObtenerInformeDescuento` | "Enviar reporte" / "Enviar". Cuerpo: `{ fechaInicio, fechaFinal, tipoInforme, guias: null, cedula }`. Encabezado `IdToken` con el token que el orquestador guarda en `localStorage` (`pf.token`, leído por `core/session/storage.service.ts`). |
 
 > El swagger publica los valores de los enums, no sus nombres. **Por confirmar con el backend**:
 >
