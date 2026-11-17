@@ -37,7 +37,7 @@ describe('VentasDescuentoService', () => {
       }),
     );
     const req = http.expectOne(
-      (r) => r.url === `${BASE}/Informes/ObtenerInformeDetalladoVentasDescuento`,
+      (r) => r.url === `${BASE}/CajaInter/Informes/ObtenerInformeDetalladoVentasDescuento`,
     );
     expect(req.request.method).toBe('GET');
     expect(req.request.params.get('FechaInicio')).toBe('2026-01-23');

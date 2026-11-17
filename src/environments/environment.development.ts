@@ -1,3 +1,3 @@
 export const environment = {
-    apiUrl: "https://konge-dev.interrapidisimo.co/api"
+    apiUrl: "http://localhost:5110/api"
 };

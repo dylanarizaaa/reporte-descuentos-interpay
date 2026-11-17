@@ -7,7 +7,7 @@ import { toDate } from '../format/formatters';
 import { type RespuestaGeneral, unwrapRespuesta } from '../http/api-response';
 import type { PeriodoProcesado, PeriodoProcesadoResponse } from './periodos-descuento.model';
 
-/** Periodos de descuentos automáticos procesados (`/Informes/ObtenerPeriodosDescuento`). */
+/** Periodos de descuentos automáticos procesados (`/CajaInter/Informes/ObtenerPeriodosDescuento`). */
 @Injectable({ providedIn: 'root' })
 export class PeriodosDescuentoService {
   private readonly http = inject(HttpClient);
@@ -20,7 +20,7 @@ export class PeriodosDescuentoService {
   getPeriodos(anio: number): Observable<PeriodoProcesado[]> {
     return this.http
       .get<RespuestaGeneral<readonly PeriodoProcesadoResponse[] | null>>(
-        `${this.baseUrl}/Informes/ObtenerPeriodosDescuento`,
+        `${this.baseUrl}/CajaInter/Informes/ObtenerPeriodosDescuento`,
         { params: new HttpParams().set('anio', anio) },
       )
       .pipe(

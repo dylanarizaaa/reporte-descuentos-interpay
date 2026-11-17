@@ -29,7 +29,7 @@ export class VentasDescuentoService {
     }
     return this.http
       .get<RespuestaGeneral<VentasDescuentoPagina>>(
-        `${this.baseUrl}/Informes/ObtenerInformeDetalladoVentasDescuento`,
+        `${this.baseUrl}/CajaInter/Informes/ObtenerInformeDetalladoVentasDescuento`,
         { params },
       )
       .pipe(map(unwrapRespuesta));

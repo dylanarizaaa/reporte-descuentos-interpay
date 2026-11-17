@@ -37,7 +37,7 @@ describe('DescuentosClienteService', () => {
         cantidadRegistros: 10,
       }),
     );
-    const req = http.expectOne((r) => r.url === '/api/Informes/ObtenerInformeDescuentoCliente');
+    const req = http.expectOne((r) => r.url === '/api/CajaInter/Informes/ObtenerInformeDescuentoCliente');
     expect(req.request.method).toBe('GET');
     expect(req.request.params.keys().sort()).toEqual(
       [

@@ -26,7 +26,7 @@ describe('PeriodosDescuentoService', () => {
 
   it('pide los periodos del año y los devuelve como fechas locales, del más reciente al más antiguo', async () => {
     const result = firstValueFrom(service.getPeriodos(2026));
-    const req = http.expectOne((r) => r.url === '/api/Informes/ObtenerPeriodosDescuento');
+    const req = http.expectOne((r) => r.url === '/api/CajaInter/Informes/ObtenerPeriodosDescuento');
     expect(req.request.method).toBe('GET');
     expect(req.request.params.get('anio')).toBe('2026');
     req.flush(
@@ -49,7 +49,7 @@ describe('PeriodosDescuentoService', () => {
   it('sin periodos devuelve una lista vacía', async () => {
     const result = firstValueFrom(service.getPeriodos(2024));
     http
-      .expectOne((r) => r.url === '/api/Informes/ObtenerPeriodosDescuento')
+      .expectOne((r) => r.url === '/api/CajaInter/Informes/ObtenerPeriodosDescuento')
       .flush(respuesta(null));
     expect(await result).toEqual([]);
   });

@@ -10,7 +10,7 @@ import type {
   SolicitudInformeDescuento,
 } from './informe-descuento.model';
 
-/** Genera los informes de descuentos (`/Informes/ObtenerInformeDescuento`) para enviarlos por correo. */
+/** Genera los informes de descuentos (`/CajaInter/Informes/ObtenerInformeDescuento`) para enviarlos por correo. */
 @Injectable({ providedIn: 'root' })
 export class InformeDescuentoService {
   private readonly http = inject(HttpClient);
@@ -26,7 +26,7 @@ export class InformeDescuentoService {
     const cedula = solicitud.cedula?.trim();
     return this.http
       .post<RespuestaGeneral<InformeDescuentoGenerado>>(
-        `${this.baseUrl}/Informes/ObtenerInformeDescuento`,
+        `${this.baseUrl}/CajaInter/Informes/ObtenerInformeDescuento`,
         {
           fechaInicio: toIsoDate(solicitud.fechaInicio),
           fechaFinal: toIsoDate(solicitud.fechaFin),
@@ -34,7 +34,12 @@ export class InformeDescuentoService {
           guias: null,
           cedula: cedula || null,
         },
-        { headers: { IdToken: this.storage.token() } },
+        {
+          headers: {
+            IdToken: this.storage.token(),
+            usuario: this.storage.userName()
+          }
+        },
       )
       .pipe(map(unwrapRespuesta));
   }

@@ -9,7 +9,7 @@ import type {
   DescuentosClientePagina,
 } from './descuentos-cliente.model';
 
-/** Descuentos y movilizados por cliente (`/Informes/ObtenerInformeDescuentoCliente`). */
+/** Descuentos y movilizados por cliente (`/CajaInter/Informes/ObtenerInformeDescuentoCliente`). */
 @Injectable({ providedIn: 'root' })
 export class DescuentosClienteService {
   private readonly http = inject(HttpClient);
@@ -29,7 +29,7 @@ export class DescuentosClienteService {
     }
     return this.http
       .get<RespuestaGeneral<DescuentosClientePagina>>(
-        `${this.baseUrl}/Informes/ObtenerInformeDescuentoCliente`,
+        `${this.baseUrl}/CajaInter/Informes/ObtenerInformeDescuentoCliente`,
         { params },
       )
       .pipe(map(unwrapRespuesta));

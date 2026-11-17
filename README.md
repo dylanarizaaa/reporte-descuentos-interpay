@@ -44,10 +44,10 @@ o con el token `API_BASE_URL`. Las respuestas usan la envoltura `RespuestaGenera
 
 | Método | Ruta | Uso |
 | --- | --- | --- |
-| GET | `/Informes/ObtenerInformeDetalladoVentasDescuento?FechaInicio&FechaFin&Cedula&Pagina&CantidadRegistros` | Datos de la tabla. Fechas sin hora (`AAAA-MM-DD`). |
-| GET | `/Informes/ObtenerInformeDescuentoCliente?TipoDescuento&FechaInicio&FechaFinal&Cedula&NumeroPagina&TamanoPagina` | Tabla de descuentos y movilizados por cliente. |
-| GET | `/Informes/ObtenerPeriodosDescuento?anio` | Periodos procesados de descuentos automáticos del año (obligatorio). |
-| POST | `/Informes/ObtenerInformeDescuento` | "Enviar reporte" / "Enviar". Cuerpo: `{ fechaInicio, fechaFinal, tipoInforme, guias: null, cedula }`. Encabezado `IdToken` con el token que el orquestador guarda en `localStorage` (`pf.token`, leído por `core/session/storage.service.ts`). |
+| GET | `/CajaInter/Informes/ObtenerInformeDetalladoVentasDescuento?FechaInicio&FechaFin&Cedula&Pagina&CantidadRegistros` | Datos de la tabla. Fechas sin hora (`AAAA-MM-DD`). |
+| GET | `/CajaInter/Informes/ObtenerInformeDescuentoCliente?TipoDescuento&FechaInicio&FechaFinal&Cedula&NumeroPagina&TamanoPagina` | Tabla de descuentos y movilizados por cliente. |
+| GET | `/CajaInter/Informes/ObtenerPeriodosDescuento?anio` | Periodos procesados de descuentos automáticos del año (obligatorio). |
+| POST | `/CajaInter/Informes/ObtenerInformeDescuento` | "Enviar reporte" / "Enviar". Cuerpo: `{ fechaInicio, fechaFinal, tipoInforme, guias: null, cedula }`. Encabezado `IdToken` con el token que el orquestador guarda en `localStorage` (`pf.token`, leído por `core/session/storage.service.ts`). |
 
 > El swagger publica los valores de los enums, no sus nombres. **Por confirmar con el backend**:
 >
