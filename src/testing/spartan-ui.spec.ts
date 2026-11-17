@@ -73,7 +73,7 @@ class PiezasHost {
     <hlm-select-multiple [(value)]="valores" aria-label="Meses">
       <hlm-select-trigger [aria-invalid]="invalido()" buttonId="meses">
         <span hlmSelectPlaceholder>Elige meses</span>
-        <hlm-select-values />
+        <span *hlmSelectValues="let meses">{{ meses.join(', ') }}</span>
       </hlm-select-trigger>
       <hlm-select-content *hlmSelectPortal>
         <hlm-select-scroll-up />
@@ -188,6 +188,14 @@ describe('Componentes de spartan.ng', () => {
     fixture.componentInstance.invalido.set('');
     await fixture.whenStable();
     expect(trigger().hasAttribute('aria-invalid')).toBe(false);
+
+    fixture.componentInstance.valores.set(['ene', 'feb']);
+    await fixture.whenStable();
+    expect(trigger().textContent).toContain('ene, feb');
+
+    fixture.componentInstance.valores.set([]);
+    await fixture.whenStable();
+    expect(trigger().textContent).not.toContain('ene');
 
     trigger().click();
     await fixture.whenStable();
