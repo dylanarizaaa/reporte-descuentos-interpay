@@ -7,7 +7,11 @@ import {
 import { TestBed } from '@angular/core/testing';
 import { provideRouter, Router } from '@angular/router';
 import { RouterTestingHarness } from '@angular/router/testing';
-import { DESCUENTOS, paginaDescuentos } from '../../../../testing/descuentos-cliente.fixtures';
+import {
+  descuento,
+  DESCUENTOS,
+  paginaDescuentos,
+} from '../../../../testing/descuentos-cliente.fixtures';
 import { PERIODOS_2025, PERIODOS_2026 } from '../../../../testing/periodos-descuento.fixtures';
 import { INFORME_GENERADO } from '../../../../testing/ventas-descuento.fixtures';
 import { API_BASE_URL } from '../../../core/config/api-base-url';
@@ -257,5 +261,66 @@ describe('AutomaticDiscounts', () => {
     button('Reintentar').click();
     await responderPeriodos(2026);
     expect(combobox('Periodo').disabled).toBe(false);
+  });
+
+  it('"Consultar" con el mismo periodo vuelve a pedir los datos', async () => {
+    await navigate(URL_DICIEMBRE, 2025);
+    expectDescuentos().flush(paginaDescuentos());
+    await stable();
+
+    button('Consultar').click();
+    await settle();
+    expectDescuentos().flush(paginaDescuentos());
+    await stable();
+    expect(element.querySelectorAll('tbody tr')).toHaveLength(10);
+  });
+
+  it('un cliente sin documento se envía con la cédula vacía', async () => {
+    await navigate(URL_DICIEMBRE, 2025);
+    expectDescuentos().flush(
+      paginaDescuentos({
+        listaResultado: [descuento({ numeroDocumento: null })],
+        totalElementos: 1,
+        totalPaginas: 1,
+      }),
+    );
+    await stable();
+
+    element
+      .querySelector<HTMLButtonElement>('[aria-label="Enviar reporte de Carlos Rodríguez"]')!
+      .click();
+    await stable();
+    [...document.querySelectorAll<HTMLButtonElement>('[role="alertdialog"] button')]
+      .find((item) => text(item) === 'Sí, enviar')!
+      .click();
+    harness.detectChanges();
+    const solicitud = http.expectOne(`${API}/ObtenerInformeDescuento`);
+    expect(solicitud.request.body.cedula).toBeNull();
+    solicitud.flush(INFORME_GENERADO);
+    await stable();
+  });
+
+  it('ordena en el cliente la página recibida', async () => {
+    await navigate(URL_DICIEMBRE, 2025);
+    expectDescuentos().flush(paginaDescuentos());
+    await stable();
+
+    const header = [...element.querySelectorAll('th')].find(
+      (th) => text(th) === 'Movilizados periodo elegido',
+    )!;
+    header.querySelector('button')!.click();
+    harness.detectChanges();
+    expect(header.getAttribute('aria-sort')).toBe('ascending');
+    expect(text(element.querySelector('tbody tr td:nth-child(4)'))).toBe('11');
+  });
+
+  it('sin periodo o sin envío pendiente la petición de envío falla sin llamar al backend', async () => {
+    await navigate();
+    const page = harness.routeDebugElement!.componentInstance as unknown as {
+      enviarInforme(): import('rxjs').Observable<unknown>;
+    };
+    let error: unknown;
+    page.enviarInforme().subscribe({ error: (e: unknown) => (error = e) });
+    expect(error).toEqual(new Error('No hay un periodo consultado para enviar.'));
   });
 });

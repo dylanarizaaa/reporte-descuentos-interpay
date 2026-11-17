@@ -104,4 +104,13 @@ describe('Mobilized', () => {
     await settle();
     expect(router.url).toBe(RUTA);
   });
+
+  it('pulsar la pestaña activa no cambia la URL', async () => {
+    await navigate();
+    const router = TestBed.inject(Router);
+
+    tabs()[0].click();
+    await settle();
+    expect(router.url).toBe(RUTA);
+  });
 });

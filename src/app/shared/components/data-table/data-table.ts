@@ -61,18 +61,10 @@ interface SizedTable {
   getEndTotalSize?(): number;
 }
 
-interface VisibleColumnsTable<TFeatures extends TableFeatures, TData extends RowData> {
-  getVisibleLeafColumns(): Column<TFeatures, TData, unknown>[];
-}
-
 interface PinnableRow<TFeatures extends TableFeatures, TData extends RowData> {
   getStartVisibleCells(): Cell<TFeatures, TData, unknown>[];
   getCenterVisibleCells(): Cell<TFeatures, TData, unknown>[];
   getEndVisibleCells(): Cell<TFeatures, TData, unknown>[];
-}
-
-interface VisibleCellsRow<TFeatures extends TableFeatures, TData extends RowData> {
-  getVisibleCells(): Cell<TFeatures, TData, unknown>[];
 }
 
 function has<T extends object>(value: object, method: keyof T): value is T {
@@ -227,12 +219,10 @@ export class DataTable<TFeatures extends TableFeatures, TData extends RowData> {
 
   /** Anchos fijos: la tabla registra `columnSizingFeature`. */
   protected readonly sized = computed(() => has<SizedTable>(this.table(), 'getTotalSize'));
-  protected readonly totalSize = computed(() => {
-    const table = this.table();
-    return has<SizedTable>(table, 'getTotalSize') ? table.getTotalSize() : null;
-  });
+  /** Ancho total; solo se usa con `sized()`. */
+  protected readonly totalSize = computed(() => (this.table() as unknown as SizedTable).getTotalSize());
 
-  /** Columnas hoja visibles en el orden en que se pintan (fijas al inicio, centro, fijas al final). */
+  /** Columnas hoja en el orden en que se pintan (fijas al inicio, centro, fijas al final). */
   protected readonly displayColumns = computed<Column<TFeatures, TData, unknown>[]>(() => {
     const table = this.table();
     if (has<PinnableTable<TFeatures, TData>>(table, 'getStartVisibleLeafColumns')) {
@@ -242,20 +232,13 @@ export class DataTable<TFeatures extends TableFeatures, TData extends RowData> {
         ...table.getEndVisibleLeafColumns(),
       ];
     }
-    if (has<VisibleColumnsTable<TFeatures, TData>>(table, 'getVisibleLeafColumns')) {
-      return table.getVisibleLeafColumns();
-    }
     return table.getAllLeafColumns();
   });
 
-  /** Ancho (px) ocupado por las columnas fijas de cada lado. */
+  /** Ancho (px) ocupado por las columnas fijas de cada lado; solo se usa con `pinningActive()`. */
   protected readonly pinnedWidth = computed(() => {
-    const table = this.table() as object;
-    const sizes = table as SizedTable;
-    return {
-      start: sizes.getStartTotalSize?.() ?? 0,
-      end: sizes.getEndTotalSize?.() ?? 0,
-    };
+    const sizes = this.table() as unknown as Required<SizedTable>;
+    return { start: sizes.getStartTotalSize(), end: sizes.getEndTotalSize() };
   });
 
   /**
@@ -290,10 +273,7 @@ export class DataTable<TFeatures extends TableFeatures, TData extends RowData> {
       // Se mide el contenedor (cambia con la pantalla) y la tabla (cambia con columnas y datos).
       const observer = new ResizeObserver(measure);
       observer.observe(scroller);
-      const table = scroller.querySelector('table');
-      if (table) {
-        observer.observe(table);
-      }
+      observer.observe(scroller.querySelector('table') as HTMLTableElement);
       destroyRef.onDestroy(() => observer.disconnect());
     });
   }
@@ -306,14 +286,12 @@ export class DataTable<TFeatures extends TableFeatures, TData extends RowData> {
         ...row.getEndVisibleCells(),
       ];
     }
-    if (has<VisibleCellsRow<TFeatures, TData>>(row, 'getVisibleCells')) {
-      return row.getVisibleCells();
-    }
     return row.getAllCells();
   }
 
-  protected columnSize(column: Column<TFeatures, TData, unknown>): number | null {
-    return has<SizedColumn>(column, 'getSize') ? column.getSize() : null;
+  /** Ancho de la columna; solo se usa con `sized()` (`<colgroup>`). */
+  protected columnSize(column: Column<TFeatures, TData, unknown>): number {
+    return (column as unknown as SizedColumn).getSize();
   }
 
   protected columnClass(
@@ -326,7 +304,7 @@ export class DataTable<TFeatures extends TableFeatures, TData extends RowData> {
       meta?.className,
       isCell ? meta?.cellClassName : undefined,
       isCell && this.density() === 'compact' ? 'h-12' : undefined,
-      pinning ? this.dividerClass(column, meta) : undefined,
+      pinning ? this.dividerClass(column) : undefined,
     ]
       .filter(Boolean)
       .join(' ');
@@ -337,21 +315,22 @@ export class DataTable<TFeatures extends TableFeatures, TData extends RowData> {
     column: Column<TFeatures, TData, unknown>,
     pinning: boolean,
   ): Record<string, string> | null {
-    if (!pinning || !has<PinnableColumn>(column, 'getIsPinned')) {
+    if (!pinning) {
       return null;
     }
-    const position = column.getIsPinned();
+    const pinnable = column as unknown as PinnableColumn;
+    const position = pinnable.getIsPinned();
     if (position === 'start') {
       return {
         position: 'sticky',
-        'inset-inline-start': `${column.getStart('start')}px`,
+        'inset-inline-start': `${pinnable.getStart('start')}px`,
         'z-index': '1',
       };
     }
     if (position === 'end') {
       return {
         position: 'sticky',
-        'inset-inline-end': `${column.getAfter('end')}px`,
+        'inset-inline-end': `${pinnable.getAfter('end')}px`,
         'z-index': '1',
       };
     }
@@ -366,19 +345,9 @@ export class DataTable<TFeatures extends TableFeatures, TData extends RowData> {
     return direction === 'asc' ? 'ascending' : direction === 'desc' ? 'descending' : 'none';
   }
 
-  /**
-   * Divisor entre las columnas fijas y las que se desplazan. La columna de checks no lleva el
-   * suyo: forma un solo grupo con la columna fija siguiente ("Columnas fijas check").
-   */
-  private dividerClass(
-    column: Column<TFeatures, TData, unknown>,
-    meta: DataTableColumnMeta | undefined,
-  ): string {
-    if (meta?.kind === 'selection' || !has<PinnableColumn>(column, 'getIsPinned')) {
-      return '';
-    }
-    const position = column.getIsPinned();
-    // "Columna" fija del handoff: divisor en Gris complementario.
+  /** Divisor entre las columnas fijas y las que se desplazan (solo se llama con fijado activo). */
+  private dividerClass(column: Column<TFeatures, TData, unknown>): string {
+    const position = (column as unknown as PinnableColumn).getIsPinned();
     return position === 'start'
       ? 'border-e'
       : position === 'end'

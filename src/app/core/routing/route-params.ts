@@ -10,12 +10,6 @@ import { ActivatedRoute } from '@angular/router';
  * Deben llamarse en un contexto de inyección (p. ej. al inicializar un campo del componente).
  */
 
-/** Parámetro de ruta (`:nombre`). Cadena vacía si la ruta no lo define. */
-export function injectRouteParam(name: string): Signal<string> {
-  const params = toSignal(inject(ActivatedRoute).paramMap, { requireSync: true });
-  return computed(() => params().get(name) ?? '');
-}
-
 /** Query param (`?nombre=`). `undefined` si no está en la URL. */
 export function injectQueryParam(name: string): Signal<string | undefined> {
   const params = toSignal(inject(ActivatedRoute).queryParamMap, { requireSync: true });

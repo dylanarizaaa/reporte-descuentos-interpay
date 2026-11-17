@@ -7,7 +7,7 @@ import {
   signal,
 } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
-import { injectTable, type SortingState, type Updater } from '@tanstack/angular-table';
+import { injectTable, type SortingState } from '@tanstack/angular-table';
 import { throwError } from 'rxjs';
 import { TipoDescuento } from '../../../core/data-access/descuentos-cliente.model';
 import { DescuentosClienteService } from '../../../core/data-access/descuentos-cliente.service';
@@ -20,7 +20,10 @@ import { TODAY } from '../../../core/date/today';
 import { resourceValue } from '../../../core/resource/resource-value';
 import { type ConsultaReporte, injectReportQuery } from '../../../core/routing/report-query';
 import { DataTable } from '../../../shared/components/data-table/data-table';
-import { REPORT_TABLE_FEATURES } from '../../../shared/components/data-table/report-columns';
+import {
+  REPORT_TABLE_FEATURES,
+  sortingChange,
+} from '../../../shared/components/data-table/report-columns';
 import { EmptyState } from '../../../shared/components/empty-state/empty-state';
 import { ErrorState } from '../../../shared/components/error-state/error-state';
 import { Paginator } from '../../../shared/components/paginator/paginator';
@@ -138,10 +141,7 @@ export class AutomaticDiscounts {
       sorting: this.sorting(),
       columnPinning: AUTOMATIC_COLUMN_PINNING,
     },
-    onSortingChange: (updater: Updater<SortingState>) =>
-      this.sorting.update((current) =>
-        typeof updater === 'function' ? updater(current) : updater,
-      ),
+    onSortingChange: sortingChange(this.sorting),
     sortDescFirst: false,
     enableMultiSort: false,
   }));
