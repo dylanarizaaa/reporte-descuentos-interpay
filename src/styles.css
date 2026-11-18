@@ -8,6 +8,24 @@
 @import './fonts.css';
 
 /*
+ * Compatibilidad con el orquestador: genera también las clases que usa el portal para que,
+ * al cargarse esta hoja de forma global, el orden de las utilidades no le rompa la vista
+ * (ver el detalle en el archivo). Temporal hasta aislar del todo los estilos del micro front.
+ */
+@source './styles/orquestador-clases.txt';
+
+/* Variante y utilidades propias del orquestador, con su misma definición. */
+@custom-variant fixed (&:is(.layout-fixed *));
+
+@utility container-wrapper {
+  @apply 3xl:fixed:max-w-[calc(var(--breakpoint-2xl)+2rem)] mx-auto w-full px-2;
+}
+
+@utility container {
+  @apply 3xl:max-w-screen-2xl mx-auto max-w-[1400px] px-4 lg:px-8;
+}
+
+/*
  * Paleta de marca (handoff de Figma). Se exponen como utilidades de Tailwind
  * (`bg-gris-inicial`, `text-acento`, `shadow-capa-1`, `rounded-card`, ...) para que los
  * componentes de `libs/ui` usen exactamente los mismos nombres que el diseño.
@@ -43,6 +61,26 @@
   --color-badge-warning-foreground: var(--badge-warning-foreground);
   --color-badge-danger: var(--badge-danger);
   --color-badge-danger-foreground: var(--badge-danger-foreground);
+
+  /* Colores del orquestador que el micro front no define (mismos valores del portal). */
+  --color-acento-inicial: #e8eff7;
+  --color-terciario-inicial: #f0edfb;
+  --color-verde: #01623d;
+  --color-verde-inicial: #f4fbf8;
+  --color-azul: #035487;
+  --color-azul-inicial: #edf4f8;
+  --color-ambar: #b37700;
+  --color-ambar-inicial: #f7f1e5;
+  --color-rojo: #a10303;
+  --color-rojo-inicial: #f9eeee;
+  --color-hover: #3b4350;
+  --color-tertiary: var(--tertiary);
+  --color-tertiary-foreground: var(--tertiary-foreground);
+  --color-surface: var(--surface);
+  --color-surface-foreground: var(--surface-foreground);
+  --breakpoint-3xl: 1600px;
+  --breakpoint-4xl: 2000px;
+  --spotlight-gradient: 68.54% 68.72% at 55.02% 31.46%, #d9d9d914 0, #8c8c8c05 50%, #73737300 80%;
 }
 
 @theme {
@@ -54,8 +92,8 @@
 :root {
   color-scheme: light;
 
-  /* Tokens primitivos de marca */
-  --negro-digital: #18191a;
+  /* Tokens primitivos de marca. Negro digital: valor del portal (el del micro front va abajo). */
+  --negro-digital: #212529;
   --gris-medio: #727272;
   --gris-oscuro: #575757;
   --gris-rafaga: #e0e0e0;
@@ -92,16 +130,69 @@
   --badge-danger: #f8eeed;
   --badge-danger-foreground: #a51d24;
 
-  --font-sans:
-    'Prospero', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial,
-    'Noto Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol',
-    'Noto Color Emoji';
-
   --chart-1: oklch(0.646 0.222 41.116);
   --chart-2: oklch(0.6 0.118 184.704);
   --chart-3: oklch(0.398 0.07 227.392);
   --chart-4: oklch(0.828 0.189 84.429);
   --chart-5: oklch(0.769 0.188 70.08);
+
+  /*
+   * Valores del orquestador. Esta hoja se carga de forma global en el portal: en `:root` van
+   * los valores del portal para no cambiar su aspecto. Los del micro front están más abajo,
+   * declarados solo en sus pantallas y en los overlays.
+   */
+  --font-sans: 'Prospero', sans-serif;
+  --radius: 0.625rem;
+  --background: #fefefe;
+  --foreground: #18191a;
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.145 0 0);
+  --popover: #fefefe;
+  --popover-foreground: #18191a;
+  --primary: #18191a;
+  --primary-foreground: #fefefe;
+  --secondary: oklch(0.97 0 0);
+  --secondary-foreground: oklch(0.205 0 0);
+  --tertiary: #6e52e1;
+  --tertiary-foreground: #f0edfb;
+  --muted: oklch(0.97 0 0);
+  --muted-foreground: oklch(0.556 0 0);
+  --accent: #2569b3;
+  --accent-foreground: #e8eff7;
+  --destructive: oklch(0.577 0.245 27.325);
+  --border: oklch(0.922 0 0);
+  --input: oklch(0.922 0 0);
+  --ring: oklch(0.708 0 0);
+  --sidebar: #fefefe;
+  --sidebar-foreground: oklch(0.145 0 0);
+  --sidebar-primary: oklch(0.205 0 0);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: #e0e0e0;
+  --sidebar-accent-foreground: #18191a;
+  --sidebar-border: oklch(0.922 0 0);
+  --sidebar-ring: oklch(0.708 0 0);
+  --surface: oklch(0.98 0 0);
+  --surface-foreground: var(--foreground);
+  --header-height: --spacing(14);
+}
+
+/*
+ * Valores del micro front: solo en sus pantallas y en los overlays (select, calendario, modales),
+ * para no pisar los del orquestador. Se repiten aquí los que dependen de `--negro-digital`
+ * porque las variables se resuelven en el elemento donde se declaran.
+ */
+app-discount-sales,
+app-mobilized,
+.cdk-overlay-container {
+  --negro-digital: #18191a;
+  /* La fuente se hereda de `html` (valor del portal): se vuelve a aplicar con la del micro front. */
+  font-family: var(--font-sans);
+
+  --font-sans:
+    'Prospero', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial,
+    'Noto Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol',
+    'Noto Color Emoji';
+
   --radius: 0.5rem;
   --background: oklch(1 0 0);
   --foreground: var(--negro-digital);
