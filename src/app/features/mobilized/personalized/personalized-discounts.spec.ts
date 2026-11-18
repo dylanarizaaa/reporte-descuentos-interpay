@@ -207,7 +207,7 @@ describe('PersonalizedDiscounts', () => {
       dialogButton('Sí, enviar').click();
       harness.detectChanges();
 
-      const solicitud = http.expectOne(`${API}/ObtenerInformeDescuento`);
+      const solicitud = http.expectOne((req) => req.url === `${API}/ObtenerInformeDescuento`);
       expect(solicitud.request.body).toEqual({
         fechaInicio: '2026-01-23',
         fechaFinal: '2026-02-22',
@@ -235,7 +235,7 @@ describe('PersonalizedDiscounts', () => {
       dialogButton('Sí, enviar').click();
       harness.detectChanges();
 
-      const solicitud = http.expectOne(`${API}/ObtenerInformeDescuento`);
+      const solicitud = http.expectOne((req) => req.url === `${API}/ObtenerInformeDescuento`);
       expect(solicitud.request.body.tipoInforme).toBe(1);
       expect(solicitud.request.body.cedula).toBe('30856789');
       solicitud.flush(INFORME_GENERADO);
@@ -287,7 +287,7 @@ describe('PersonalizedDiscounts', () => {
     await stable();
     dialogButton('Sí, enviar').click();
     harness.detectChanges();
-    const solicitud = http.expectOne(`${API}/ObtenerInformeDescuento`);
+    const solicitud = http.expectOne((req) => req.url === `${API}/ObtenerInformeDescuento`);
     expect(solicitud.request.body.cedula).toBeNull();
     solicitud.flush(INFORME_GENERADO);
     await stable();

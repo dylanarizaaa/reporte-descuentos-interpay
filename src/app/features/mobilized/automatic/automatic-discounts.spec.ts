@@ -233,7 +233,7 @@ describe('AutomaticDiscounts', () => {
       .click();
     harness.detectChanges();
 
-    const solicitud = http.expectOne(`${API}/ObtenerInformeDescuento`);
+    const solicitud = http.expectOne((req) => req.url === `${API}/ObtenerInformeDescuento`);
     expect(solicitud.request.body).toEqual({
       fechaInicio: '2025-12-01',
       fechaFinal: '2025-12-31',
@@ -294,7 +294,7 @@ describe('AutomaticDiscounts', () => {
       .find((item) => text(item) === 'Sí, enviar')!
       .click();
     harness.detectChanges();
-    const solicitud = http.expectOne(`${API}/ObtenerInformeDescuento`);
+    const solicitud = http.expectOne((req) => req.url === `${API}/ObtenerInformeDescuento`);
     expect(solicitud.request.body.cedula).toBeNull();
     solicitud.flush(INFORME_GENERADO);
     await stable();

@@ -39,7 +39,7 @@ describe('InformeDescuentoService', () => {
         cedula: ' 30856789 ',
       }),
     );
-    const req = http.expectOne('/api/CajaInter/Informes/ObtenerInformeDescuento');
+    const req = http.expectOne((r) => r.url === '/api/CajaInter/Informes/ObtenerInformeDescuento');
     expect(req.request.method).toBe('POST');
     // El backend identifica al destinatario del correo por el token y el usuario de la sesión.
     expect(req.request.headers.get('IdToken')).toBe('token-de-sesion');
@@ -63,7 +63,7 @@ describe('InformeDescuentoService', () => {
         fechaFin: new Date(2026, 0, 2),
       })
       .subscribe();
-    const req = http.expectOne('/api/CajaInter/Informes/ObtenerInformeDescuento');
+    const req = http.expectOne((r) => r.url === '/api/CajaInter/Informes/ObtenerInformeDescuento');
     expect(req.request.body.cedula).toBeNull();
     expect(req.request.body.tipoInforme).toBe(3);
     req.flush(INFORME_GENERADO);
