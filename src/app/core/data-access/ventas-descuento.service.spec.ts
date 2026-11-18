@@ -40,6 +40,10 @@ describe('VentasDescuentoService', () => {
       (r) => r.url === `${BASE}/CajaInter/Informes/ObtenerInformeDetalladoVentasDescuento`,
     );
     expect(req.request.method).toBe('GET');
+    // Envía las cookies de la sesión (opciones de la petición, no parámetros de la URL).
+    expect(req.request.withCredentials).toBe(true);
+    expect(req.request.credentials).toBe('include');
+    expect(req.request.urlWithParams).not.toContain('withCredentials');
     expect(req.request.params.get('FechaInicio')).toBe('2026-01-23');
     expect(req.request.params.get('FechaFin')).toBe('2026-02-22');
     expect(req.request.params.get('Pagina')).toBe('2');

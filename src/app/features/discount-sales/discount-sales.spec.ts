@@ -293,7 +293,7 @@ describe('DiscountSales', () => {
       enviar.click();
       harness.detectChanges();
 
-      const solicitud = http.expectOne((req) => req.url === `${API}/ObtenerInformeDescuento`);
+      const solicitud = http.expectOne(`${API}/ObtenerInformeDescuento`);
       expect(solicitud.request.method).toBe('POST');
       expect(solicitud.request.body).toEqual({
         fechaInicio: '2026-01-23',
@@ -327,7 +327,7 @@ describe('DiscountSales', () => {
       harness.detectChanges();
 
       expect(dialog()).toBeNull();
-      http.expectNone((req) => req.url === `${API}/ObtenerInformeDescuento`);
+      http.expectNone(`${API}/ObtenerInformeDescuento`);
     });
 
     it('si el envío falla, el modal sigue abierto con el error para reintentar', async () => {
@@ -335,7 +335,7 @@ describe('DiscountSales', () => {
       dialogButton('Enviar').click();
       harness.detectChanges();
       http
-        .expectOne((req) => req.url === `${API}/ObtenerInformeDescuento`)
+        .expectOne(`${API}/ObtenerInformeDescuento`)
         .flush('Error', { status: 500, statusText: 'Server Error' });
       await stable();
 

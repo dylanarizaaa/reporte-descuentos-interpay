@@ -28,6 +28,10 @@ describe('PeriodosDescuentoService', () => {
     const result = firstValueFrom(service.getPeriodos(2026));
     const req = http.expectOne((r) => r.url === '/api/CajaInter/Informes/ObtenerPeriodosDescuento');
     expect(req.request.method).toBe('GET');
+    // Envía las cookies de la sesión (opciones de la petición, no parámetros de la URL).
+    expect(req.request.withCredentials).toBe(true);
+    expect(req.request.credentials).toBe('include');
+    expect(req.request.urlWithParams).not.toContain('withCredentials');
     expect(req.request.params.get('anio')).toBe('2026');
     req.flush(
       respuesta([

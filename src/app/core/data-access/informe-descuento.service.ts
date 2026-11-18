@@ -39,10 +39,9 @@ export class InformeDescuentoService {
             IdToken: this.storage.token(),
             usuario: this.storage.userName()
           },
-          params: {
-            withCredentials: true,
-            credentials: 'include'
-          }
+          // Opciones de la petición (no parámetros de la URL): envían las cookies de la sesión.
+          withCredentials: true,
+          credentials: 'include',
         },
       )
       .pipe(map(unwrapRespuesta));

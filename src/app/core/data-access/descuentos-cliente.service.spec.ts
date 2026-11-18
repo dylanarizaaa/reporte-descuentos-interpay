@@ -39,6 +39,10 @@ describe('DescuentosClienteService', () => {
     );
     const req = http.expectOne((r) => r.url === '/api/CajaInter/Informes/ObtenerInformeDescuentoCliente');
     expect(req.request.method).toBe('GET');
+    // Envía las cookies de la sesión (opciones de la petición, no parámetros de la URL).
+    expect(req.request.withCredentials).toBe(true);
+    expect(req.request.credentials).toBe('include');
+    expect(req.request.urlWithParams).not.toContain('withCredentials');
     expect(req.request.params.keys().sort()).toEqual(
       [
         'Cedula',
