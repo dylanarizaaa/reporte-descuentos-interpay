@@ -1,17 +1,12 @@
 import { Routes } from '@angular/router';
 
 export const routes: Routes = [
-  {
-    path: 'ventas-descuento',
-    title: 'Ventas con descuento',
-    loadComponent: () =>
-      import('./features/discount-sales/discount-sales').then((c) => c.DiscountSales),
-  },
-  {
-    path: 'movilizados-cliente',
-    title: 'Movilizados por cliente',
-    loadComponent: () => import('./features/mobilized/mobilized').then((c) => c.Mobilized),
-  },
+    {
+        path: 'ventas-descuento',
+        loadChildren: () => import('./features/discount-sales/discount-sales.routes').then(m => m.routes)
+    },
+    {
+        path: 'movilizados-cliente',
+        loadChildren: () => import('./features/mobilized/mobilized.routes').then(m => m.routes)
+    },
 ];
-
-export default routes;

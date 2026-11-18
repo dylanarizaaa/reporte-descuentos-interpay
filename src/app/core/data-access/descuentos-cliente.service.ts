@@ -30,7 +30,7 @@ export class DescuentosClienteService {
     return this.http
       .get<RespuestaGeneral<DescuentosClientePagina>>(
         `${this.baseUrl}/CajaInter/Informes/ObtenerInformeDescuentoCliente`,
-        { params },
+        { params, withCredentials: true, credentials: 'include' },
       )
       .pipe(map(unwrapRespuesta));
   }

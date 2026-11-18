@@ -4,7 +4,8 @@ module.exports = withNativeFederation({
   name: 'reporte-descuentos-interpay',
 
   exposes: {
-    './Routes': './src/app/app.routes.ts',
+    './DiscountSales': './src/app/features/discount-sales/discount-sales.routes.ts',
+    './ClientMobilized': './src/app/features/mobilized/mobilized.routes.ts',
   },
 
   shared: {

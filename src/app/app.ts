@@ -7,6 +7,9 @@ import { RouterOutlet } from '@angular/router';
  */
 @Component({
   selector: 'app-root',
+  host: {
+    class: 'mf-scope block',
+  },
   imports: [RouterOutlet],
   template: '<router-outlet />',
 })

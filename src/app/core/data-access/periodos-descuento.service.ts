@@ -21,7 +21,7 @@ export class PeriodosDescuentoService {
     return this.http
       .get<RespuestaGeneral<readonly PeriodoProcesadoResponse[] | null>>(
         `${this.baseUrl}/CajaInter/Informes/ObtenerPeriodosDescuento`,
-        { params: new HttpParams().set('anio', anio) },
+        { params: new HttpParams().set('anio', anio), withCredentials: true, credentials: 'include' },
       )
       .pipe(
         map(unwrapRespuesta),

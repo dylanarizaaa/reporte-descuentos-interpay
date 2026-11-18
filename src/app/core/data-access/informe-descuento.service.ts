@@ -38,6 +38,10 @@ export class InformeDescuentoService {
           headers: {
             IdToken: this.storage.token(),
             usuario: this.storage.userName()
+          },
+          params: {
+            withCredentials: true,
+            credentials: 'include'
           }
         },
       )
