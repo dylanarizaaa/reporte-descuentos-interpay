@@ -1,5 +1,9 @@
 {
   "plugins": {
-    "@tailwindcss/postcss": {}
+    "@tailwindcss/postcss": {},
+    "./tools/postcss-mf-scope.cjs": {
+      "scope": ".mf-reportes",
+      "files": ["src/styles.css"]
+    }
   }
 }

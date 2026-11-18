@@ -57,6 +57,23 @@ o con el token `API_BASE_URL`. Las respuestas usan la envoltura `RespuestaGenera
 > - Automáticos: "Movilizados mes anterior" usa `movilizadosInterPay` y "Movilizados periodo
 >   elegido" usa `numeroMovilizados` (`automatic-discounts.columns.ts`).
 
+## Estilos encapsulados
+
+El orquestador carga la hoja de estilos de este micro front de forma global. Para que no le pise
+los estilos al portal (ni el portal al micro front), todo su CSS vive dentro de la clase
+`.mf-reportes`:
+
+1. **Build:** `tools/postcss-mf-scope.cjs` (configurado en `.postcssrc.json`) reescribe
+   `src/styles.css` después de Tailwind: `:root`/`html`/`body` pasan a `.mf-reportes` y el resto
+   de selectores queda dentro de ella (`.flex` → `.mf-reportes .flex`). Las clases de las
+   plantillas no cambian.
+2. **Pantallas:** las rutas expuestas (`./DiscountSales`, `./ClientMobilized`) se envuelven en
+   `MfScope` (`src/app/core/mf-scope`), que lleva la clase.
+3. **Overlays:** select, calendario y modales se dibujan fuera de las pantallas; `provideMfScope()`
+   les da un contenedor propio (`MfOverlayContainer`) con la misma clase.
+
+Si se cambia el nombre de la clase, hay que cambiarlo en `.postcssrc.json` y en `MF_SCOPE_CLASS`.
+
 ## Desarrollo
 
 ```bash
